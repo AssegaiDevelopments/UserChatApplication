@@ -1,0 +1,12 @@
+//-- Java Final Project --//
+
+User registration and login - Aren /
+Message sending and receiving - Ocdol and Cyrus
+Online status indicator - Jake and Abenojar
+Chat history per user - Ocdol and Cyrus
+Admin control over users - Aren, Rodriguez, and Ocdol
+
+GUI - Aren and Rodriguez
+Encrypt and Decrypt - Vince and Jake
+Online Database/Networking - Rodriguez
+Program Tester - Vince and Abenojar
