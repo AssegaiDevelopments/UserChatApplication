@@ -5,15 +5,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
+import java.util.Arrays;
 
-public class login extends JFrame {
+public class Login extends JFrame {
     private JPanel contentPanel;
     private JPanel signupP;
     private JPanel loginP;
-//    private JPanel mainP;
 
-    public login() {
+    public Login() {
         setTitle("Sign Up");
+
+        //Database connection
         String url = "jdbc:mysql://localhost:3306/infoman";
         String user = "root";
         String password = "";
@@ -29,28 +31,29 @@ public class login extends JFrame {
         signupP.setSize(300, 500);
         signupP.setBackground(Color.DARK_GRAY);
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
         JLabel sLabel = new JLabel("Sign Up", JLabel.CENTER);
         sLabel.setFont(new Font("Arial", Font.BOLD, 24));
         sLabel.setForeground(Color.ORANGE);
+
         JTextField sUser = new JTextField(20);
-//        sUser.setText("  Username");
         sUser.setToolTipText("Username");
         sUser.setCaretColor(Color.ORANGE);
-        sUser.setCaretPosition(sUser.getText().length());
+
         JPasswordField sPass = new JPasswordField();
-//        sPass.setText("  Password");
         sPass.setToolTipText("Password");
         sPass.setCaretColor(Color.ORANGE);
-//        sPass.setCaretPosition(sPass.getText().length());
+
         JTextField sEmail = new JTextField(20);
-//        sEmail.setText("  youremail@example.com");
-//        sEmail.setCaretPosition(sEmail.getText().length());
         sEmail.setToolTipText("Email");
         sEmail.setCaretColor(Color.ORANGE);
+
         setLineBorder(sUser);
         setLineBorder(sPass);
         setLineBorder(sEmail);
+
         JButton sButton = new JButton("Sign Up");
+        sButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         sButton.setForeground(Color.ORANGE);
         sButton.setBackground(Color.WHITE);
         sButton.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
@@ -72,8 +75,9 @@ public class login extends JFrame {
         sButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                char[] toCheck = sPass.getPassword();
                 String userF = sUser.getText();
-                String passF = sPass.getText();
+                String passF = new String(toCheck);
                 String emailF = sEmail.getText();
 
                 if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
@@ -82,19 +86,63 @@ public class login extends JFrame {
                 }
 
                 try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                    String selectQuery = "SELECT * FROM credentials WHERE Users = ?";
+                    String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ?";
                     try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                         statement.setString(1, userF);
                         ResultSet resultSet = statement.executeQuery();
 
                         if (resultSet.next()) {
                             JOptionPane.showMessageDialog(contentPanel, "Username already exists", "Username Error", JOptionPane.ERROR_MESSAGE);
+                            sPass.setText("");
                             return;
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage());
-                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(contentPanel, "Username already exists", "Username Error", JOptionPane.ERROR_MESSAGE);
+                    sPass.setText("");
+                }
+
+                try (Connection connection = DriverManager.getConnection(url, user, password)) {
+                    String selectQuery = "SELECT * FROM credentials WHERE BINARY Email = ?";
+                    try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
+                        statement.setString(1, emailF);
+                        ResultSet resultSet = statement.executeQuery();
+
+                        if(!emailF.contains("@")) {
+                            JOptionPane.showMessageDialog(contentPanel, "Email must contain \'@\'", "Email Error", JOptionPane.ERROR_MESSAGE);
+                            sPass.setText("");
+                            return;
+                        }
+
+                        if (resultSet.next()) {
+                            JOptionPane.showMessageDialog(contentPanel, "Email already used", "Email Error", JOptionPane.ERROR_MESSAGE);
+                            sPass.setText("");
+                            return;
+                        }
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(contentPanel, "Email already used", "Email Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+                String uppercasePattern = ".*[A-Z].*";
+                String lowercasePattern = ".*[a-z].*";
+                String digitPattern = ".*\\d.*";
+                String symbolPattern = ".*[~`!@#$%^&*()_,.?/\"':;{}|\\<>\\[\\]].*";
+                String passwordToCheck = sPass.getText();
+
+                if (!(passwordToCheck.matches(uppercasePattern) &&
+                        passwordToCheck.matches(lowercasePattern) &&
+                        passwordToCheck.matches(digitPattern) &&
+                        passwordToCheck.matches(symbolPattern))) {
+                    JOptionPane.showMessageDialog(contentPanel, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
+                    sPass.setText("");
+                    return;
+                }
+
+                if(sPass.getText().length() < 8) {
+                    JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8", "Password Error", JOptionPane.WARNING_MESSAGE);
+                    sPass.setText("");
+                    return;
                 }
 
                 try (Connection connection = DriverManager.getConnection(url, user, password)) {
@@ -115,15 +163,17 @@ public class login extends JFrame {
                             repaint();
                         } else {
                             JOptionPane.showMessageDialog(contentPanel, "Signup failed.", "Signup Error", JOptionPane.ERROR_MESSAGE);
+                            sPass.setText("");
                         }
                     }
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage());
                     ex.printStackTrace();
                 }
+                Arrays.fill(toCheck, '\0');
             }
         });
-        JLabel sLabelLink = new JLabel("Log in here!");
+        JLabel sLabelLink = new JLabel("Already have an account? Log in here!");
         sLabelLink.setForeground(Color.ORANGE);
         sLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         sLabelLink.addMouseListener(new MouseAdapter() {
@@ -151,14 +201,11 @@ public class login extends JFrame {
                 sLabelLink.setForeground(Color.ORANGE);
             }
         });
-        JLabel sLabel2 = new JLabel("Already have an account?");
-        sLabel2.setForeground(Color.ORANGE);
         signupP.add(sLabel);
         signupP.add(sUser);
         signupP.add(sEmail);
         signupP.add(sPass);
         signupP.add(sButton);
-        signupP.add(sLabel2);
         signupP.add(sLabelLink);
 
         //########################## S I G N U P C O D E S ######################################
@@ -173,15 +220,11 @@ public class login extends JFrame {
         lLabel.setFont(new Font("Arial", Font.BOLD, 24));
         lLabel.setForeground(Color.ORANGE);
         JTextField lUser = new JTextField(20);
-//        lUser.setText("  Username or Email");
         lUser.setToolTipText("Username or Email");
         lUser.setCaretColor(Color.ORANGE);
-//        lUser.setCaretPosition(lUser.getText().length());
         JPasswordField lPass = new JPasswordField();
         lPass.setToolTipText("Password");
-//        lPass.setText("  Password");
         lPass.setCaretColor(Color.ORANGE);
-//        lPass.setCaretPosition(lPass.getText().length());
         setLineBorder(lUser);
         setLineBorder(lPass);
         JButton lButton = new JButton("Login");
@@ -205,8 +248,9 @@ public class login extends JFrame {
         lButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                char[] toCheck = lPass.getPassword();
                 String userF = lUser.getText();
-                String passF = lPass.getText();
+                String passF = new String(toCheck);
 
                 if (userF.isEmpty() || passF.isEmpty()) {
                     JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials", "Login Error", JOptionPane.ERROR_MESSAGE);
@@ -214,7 +258,7 @@ public class login extends JFrame {
                 }
 
                 try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                    String selectQuery = "SELECT * FROM credentials WHERE Users = ? AND Password = ?";
+                    String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ? AND BINARY Password = ?";
                     try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                         statement.setString(1, userF);
                         statement.setString(2, passF);
@@ -226,24 +270,19 @@ public class login extends JFrame {
                             dispose();
                             new MainPanel(userF); //--After successful login--//
 
-//                            setTitle("Main Panel");
-//                            remove(contentPanel);
-//                            contentPanel = mainP;
-//                            add(contentPanel, BorderLayout.CENTER);
-//                            revalidate();
-//                            repaint();
-
                         } else {
                             JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password", "Login Error", JOptionPane.ERROR_MESSAGE);
+                            lPass.setText("");
                         }
                     }
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage());
                     ex.printStackTrace();
                 }
+                Arrays.fill(toCheck, '\0');
             }
         });
-        JLabel lLabelLink = new JLabel("Sign up here!");
+        JLabel lLabelLink = new JLabel("Don't have an account? Sign up here!");
         lLabelLink.setForeground(Color.ORANGE);
         lLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         lLabelLink.addMouseListener(new MouseAdapter() {
@@ -271,48 +310,13 @@ public class login extends JFrame {
                 lLabelLink.setForeground(Color.ORANGE);
             }
         });
-        JLabel lLabel2 = new JLabel("Don't have an account?");
-        lLabel2.setForeground(Color.ORANGE);
         loginP.add(lLabel);
         loginP.add(lUser);
         loginP.add(lPass);
         loginP.add(lButton);
-        loginP.add(lLabel2);
         loginP.add(lLabelLink);
 
         //##################################### L O G I N C O D E S ######################################
-
-        //##################################### M A I N P A N E L C O D E S ######################################
-
-//        mainP = new JPanel(new GridLayout(3, 1));
-//        mainP.setForeground(Color.BLACK);
-//        mainP.setSize(300, 500);
-//        mainP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-//        JLabel mLabel = new JLabel("Main Panel");
-//        JButton mButton = new JButton("Logout");
-//        mButton.setSize(100, 50);
-//        mButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                try {
-//                    JOptionPane.showMessageDialog(contentPanel, "You are logged out!", "Logout", JOptionPane.INFORMATION_MESSAGE);
-//                    setTitle("Login");
-//                    remove(contentPanel);
-//                    contentPanel = loginP;
-//                    add(contentPanel, BorderLayout.CENTER);
-//                    revalidate();
-//                    repaint();
-//                } catch (Exception ex) {
-//                    //
-//                }
-//            }
-//        });
-//        JLabel mLabel2 = new JLabel("You are logged in!");
-//        mainP.add(mLabel);
-//        mainP.add(mLabel2);
-//        mainP.add(mButton);
-
-        //##################################### M A I N P A N E L C O D E S ######################################
 
         //Some tricks
         contentPanel.add(signupP);
@@ -333,7 +337,7 @@ public class login extends JFrame {
     }
 
     public static void main(String[] args) {
-        new login();
+        new Login();
     }
 
 }
@@ -357,6 +361,7 @@ class MainPanel extends JFrame {
 
         JButton logoutButton = new JButton("Logout");
         logoutButton.setFocusable(false);
+        logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         logoutButton.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
         logoutButton.setBackground(Color.WHITE);
         logoutButton.setForeground(Color.ORANGE);
@@ -366,7 +371,7 @@ class MainPanel extends JFrame {
         logoutButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "You are logged out!", "Logout", JOptionPane.INFORMATION_MESSAGE);
             dispose();
-            new login();
+            new Login();
         });
         logoutButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -380,7 +385,6 @@ class MainPanel extends JFrame {
                 logoutButton.setBackground(Color.WHITE);
                 logoutButton.setForeground(Color.ORANGE);
             }
-
         });
 
         JPanel contentPanel = new JPanel(new BorderLayout());
