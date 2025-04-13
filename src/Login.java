@@ -15,10 +15,15 @@ public class Login extends JFrame {
     public Login() {
         setTitle("Sign Up");
 
-        //Database connection
+        //Local database connection
         String url = "jdbc:mysql://localhost:3306/infoman";
         String user = "root";
         String password = "";
+
+        //Online database connection
+        //jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
+        // String user = "sql12772723";
+        // String password = "p9YsNWBkzK";
 
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.DARK_GRAY);
