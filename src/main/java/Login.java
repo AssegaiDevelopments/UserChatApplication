@@ -1,4 +1,12 @@
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,19 +19,21 @@ public class Login extends JFrame {
     private JPanel contentPanel;
     private JPanel signupP;
     private JPanel loginP;
+    private final Color accentColor = UIManager.getColor("Component.focusColor");
+    private final Color panelBg = UIManager.getColor("Panel.background");
 
     public Login() {
         setTitle("Sign Up");
 
         //Local database connection
-        String url = "jdbc:mysql://localhost:3306/infoman";
-        String user = "root";
-        String password = "";
+        final String url = "jdbc:mysql://localhost:3306/infoman";
+        final String user = "root";
+        final String password = "";
 
         //Online database connection
-        //jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
-        // String user = "sql12772723";
-        // String password = "p9YsNWBkzK";
+        //final jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
+        //final String user = "sql12772723";
+        //final String password = "p9YsNWBkzK";
 
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.DARK_GRAY);
@@ -34,46 +44,46 @@ public class Login extends JFrame {
 
         signupP = new JPanel(new GridLayout(7, 1, 15, 15));
         signupP.setSize(300, 500);
-        signupP.setBackground(Color.DARK_GRAY);
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel sLabel = new JLabel("Sign Up", JLabel.CENTER);
-        sLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        sLabel.setForeground(Color.ORANGE);
+        sLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
+        sLabel.setForeground(UIManager.getColor("Label.foreground"));
 
         JTextField sUser = new JTextField(20);
         sUser.setToolTipText("Username");
-        sUser.setCaretColor(Color.ORANGE);
+        sUser.setCaretColor(accentColor);
 
         JPasswordField sPass = new JPasswordField();
         sPass.setToolTipText("Password");
-        sPass.setCaretColor(Color.ORANGE);
-
+        sPass.setCaretColor(accentColor);
+        sPass.putClientProperty(FlatClientProperties.STYLE, "showRevealButton: true");
         JTextField sEmail = new JTextField(20);
         sEmail.setToolTipText("Email");
-        sEmail.setCaretColor(Color.ORANGE);
+        sEmail.setCaretColor(accentColor);
 
-        setLineBorder(sUser);
-        setLineBorder(sPass);
-        setLineBorder(sEmail);
+        textFieldDesigner(sUser);
+        textFieldDesigner(sPass);
+        textFieldDesigner(sEmail);
 
         JButton sButton = new JButton("Sign Up");
         sButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        sButton.setForeground(Color.ORANGE);
-        sButton.setBackground(Color.WHITE);
-        sButton.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
+        sButton.setForeground(accentColor);
+        sButton.setBackground(panelBg);
+        sButton.setBorder(BorderFactory.createLineBorder(accentColor, 2));
         sButton.setFocusable(false);
+//        sButton.putClientProperty(FlatClientProperties.STYLE, "arc: 15");
         sButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                sButton.setBackground(Color.ORANGE);
+                sButton.setBackground(accentColor);
                 sButton.setForeground(Color.WHITE);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                sButton.setBackground(Color.WHITE);
-                sButton.setForeground(Color.ORANGE);
+                sButton.setBackground(panelBg);
+                sButton.setForeground(accentColor);
             }
 
         });
@@ -86,7 +96,7 @@ public class Login extends JFrame {
                 String emailF = sEmail.getText();
 
                 if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
-                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials");
+                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing!", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -97,13 +107,13 @@ public class Login extends JFrame {
                         ResultSet resultSet = statement.executeQuery();
 
                         if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Username already exists", "Username Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.ERROR_MESSAGE);
                             sPass.setText("");
                             return;
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Username already exists", "Username Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.ERROR_MESSAGE);
                     sPass.setText("");
                 }
 
@@ -114,19 +124,19 @@ public class Login extends JFrame {
                         ResultSet resultSet = statement.executeQuery();
 
                         if(!emailF.contains("@")) {
-                            JOptionPane.showMessageDialog(contentPanel, "Email must contain \'@\'", "Email Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Email must contain \'@\'", "Email Error!", JOptionPane.ERROR_MESSAGE);
                             sPass.setText("");
                             return;
                         }
 
                         if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Email already used", "Email Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.ERROR_MESSAGE);
                             sPass.setText("");
                             return;
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Email already used", "Email Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.ERROR_MESSAGE);
                 }
 
                 String uppercasePattern = ".*[A-Z].*";
@@ -145,7 +155,7 @@ public class Login extends JFrame {
                 }
 
                 if(sPass.getText().length() < 8) {
-                    JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8", "Password Error", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8!", "Password Error!", JOptionPane.WARNING_MESSAGE);
                     sPass.setText("");
                     return;
                 }
@@ -159,7 +169,7 @@ public class Login extends JFrame {
                         int rowsInserted = statement.executeUpdate();
 
                         if (rowsInserted > 0) {
-                            JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
                             setTitle("Log in");
                             remove(contentPanel);
                             contentPanel = loginP;
@@ -179,7 +189,7 @@ public class Login extends JFrame {
             }
         });
         JLabel sLabelLink = new JLabel("Already have an account? Log in here!");
-        sLabelLink.setForeground(Color.ORANGE);
+        sLabelLink.setForeground(Color.WHITE);
         sLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         sLabelLink.addMouseListener(new MouseAdapter() {
             @Override
@@ -198,12 +208,12 @@ public class Login extends JFrame {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                sLabelLink.setForeground(Color.WHITE);
+                sLabelLink.setForeground(Color.LIGHT_GRAY);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                sLabelLink.setForeground(Color.ORANGE);
+                sLabelLink.setForeground(Color.WHITE);
             }
         });
         signupP.add(sLabel);
@@ -218,36 +228,43 @@ public class Login extends JFrame {
         //##################################### L O G I N C O D E S ######################################
 
         loginP = new JPanel(new GridLayout(6, 1,15 ,15));
-        loginP.setBackground(Color.DARK_GRAY);
         loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
         JLabel lLabel = new JLabel("Login", JLabel.CENTER);
-        lLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        lLabel.setForeground(Color.ORANGE);
+        lLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
+        lLabel.setForeground(UIManager.getColor("Label.foreground"));
+
         JTextField lUser = new JTextField(20);
-        lUser.setToolTipText("Username or Email");
-        lUser.setCaretColor(Color.ORANGE);
+        lUser.setToolTipText("Username");
+        lUser.setCaretColor(accentColor);
+
         JPasswordField lPass = new JPasswordField();
         lPass.setToolTipText("Password");
-        lPass.setCaretColor(Color.ORANGE);
-        setLineBorder(lUser);
-        setLineBorder(lPass);
+        lPass.setCaretColor(accentColor);
+        lPass.putClientProperty(FlatClientProperties.STYLE, "showRevealButton: true");
+
+        textFieldDesigner(lUser);
+        textFieldDesigner(lPass);
+
         JButton lButton = new JButton("Login");
-        lButton.setForeground(Color.ORANGE);
-        lButton.setBackground(Color.WHITE);
-        lButton.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
+        lButton.setForeground(accentColor);
+        lButton.setBackground(panelBg);
+        lButton.setBorder(BorderFactory.createLineBorder(accentColor, 2));
         lButton.setFocusable(false);
+        lButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//        lButton.putClientProperty(FlatClientProperties.STYLE, "arc: 15");
         lButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                lButton.setBackground(Color.ORANGE);
+                lButton.setBackground(accentColor);
                 lButton.setForeground(Color.WHITE);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                lButton.setBackground(Color.WHITE);
-                lButton.setForeground(Color.ORANGE);
+                lButton.setBackground(panelBg);
+                lButton.setForeground(accentColor);
             }
         });
         lButton.addActionListener(new ActionListener() {
@@ -258,7 +275,7 @@ public class Login extends JFrame {
                 String passF = new String(toCheck);
 
                 if (userF.isEmpty() || passF.isEmpty()) {
-                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials", "Login Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials!", "Login Error!", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -270,13 +287,13 @@ public class Login extends JFrame {
                         ResultSet resultSet = statement.executeQuery();
 
                         if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
 
                             dispose();
                             new MainPanel(userF); //--After successful login--//
 
                         } else {
-                            JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password", "Login Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password!", "Login Error!", JOptionPane.ERROR_MESSAGE);
                             lPass.setText("");
                         }
                     }
@@ -288,7 +305,7 @@ public class Login extends JFrame {
             }
         });
         JLabel lLabelLink = new JLabel("Don't have an account? Sign up here!");
-        lLabelLink.setForeground(Color.ORANGE);
+        lLabelLink.setForeground(Color.WHITE);
         lLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         lLabelLink.addMouseListener(new MouseAdapter() {
             @Override
@@ -307,12 +324,12 @@ public class Login extends JFrame {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                lLabelLink.setForeground(Color.WHITE);
+                lLabelLink.setForeground(Color.LIGHT_GRAY);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                lLabelLink.setForeground(Color.ORANGE);
+                lLabelLink.setForeground(Color.WHITE);
             }
         });
         loginP.add(lLabel);
@@ -324,27 +341,44 @@ public class Login extends JFrame {
         //##################################### L O G I N C O D E S ######################################
 
         //Some tricks
-        contentPanel.add(signupP);
+        contentPanel.add(signupP, "SignUp");
         remove(contentPanel);
         contentPanel = signupP;
+
+        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
 
         add(contentPanel, BorderLayout.CENTER);
         setLayout(new BorderLayout());
         add(contentPanel, BorderLayout.CENTER);
+        setIconImage(icon.getImage());
+        setResizable(false);
         setLocation(500, 150);
         setSize(300, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    private void setLineBorder(JTextField textField) {
-        textField.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
+    private void textFieldDesigner(JTextField textField) {
+        textField.setBorder(BorderFactory.createLineBorder(accentColor, 2));
+
+        textField.setBorder(BorderFactory.createCompoundBorder(
+                textField.getBorder(),
+                new EmptyBorder(5, 10, 5, 10)
+        ));
+
+        textField.setFont(new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 16));
+
+//        textField.putClientProperty(FlatClientProperties.STYLE, "arc: 15");
     }
 
     public static void main(String[] args) {
+        FlatRobotoFont.install();
+        FlatLaf.registerCustomDefaultsSource("uca.themes");
+        UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
+//        ModifiedFlatMacDarkLaf.setup();
+        FlatMacDarkLaf.setup();
         new Login();
     }
-
 }
 
 //Call after successful login
@@ -357,11 +391,11 @@ class MainPanel extends JFrame {
         setLayout(new BorderLayout());
 
         JLabel usernameLabel = new JLabel("@" + username, JLabel.CENTER);
-        usernameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        usernameLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 18));
         usernameLabel.setForeground(Color.WHITE);
 
         JLabel welcomeLabel = new JLabel("Welcome to the Main Panel", JLabel.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        welcomeLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
         welcomeLabel.setForeground(Color.WHITE);
 
         JButton logoutButton = new JButton("Logout");
@@ -398,7 +432,6 @@ class MainPanel extends JFrame {
         contentPanel.add(usernameLabel, BorderLayout.NORTH);
         contentPanel.add(welcomeLabel, BorderLayout.CENTER);
         contentPanel.add(logoutButton, BorderLayout.SOUTH);
-
         add(contentPanel, BorderLayout.CENTER);
         setVisible(true);
     }
