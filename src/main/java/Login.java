@@ -3,10 +3,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
-import net.miginfocom.swing.MigLayout;
-
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,13 +14,13 @@ import java.util.Arrays;
 
 public class Login extends JFrame {
     private JPanel contentPanel;
-    private JPanel signupP;
-    private JPanel loginP;
-    private final Color accentColor = UIManager.getColor("Component.focusColor");
+    private final JPanel signupP;
+    private final JPanel loginP;
+    private final Color accentColor = Color.decode("#1877F2");
     private final Color panelBg = UIManager.getColor("Panel.background");
 
     public Login() {
-        setTitle("Sign Up");
+        setTitle("Log in");
 
         //Local database connection
         final String url = "jdbc:mysql://localhost:3306/infoman";
@@ -31,9 +28,9 @@ public class Login extends JFrame {
         final String password = "";
 
         //Online database connection
-        //final jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
-        //final String user = "sql12772723";
-        //final String password = "p9YsNWBkzK";
+        /*final jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
+        final String user = "sql12772723";
+        final String password = "p9YsNWBkzK";*/
 
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.DARK_GRAY);
@@ -42,7 +39,7 @@ public class Login extends JFrame {
 
         //########################## S I G N U P C O D E S ######################################
 
-        signupP = new JPanel(new GridLayout(7, 1, 15, 15));
+        signupP = new JPanel(new GridLayout(6, 1, 30, 15));
         signupP.setSize(300, 500);
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -51,28 +48,30 @@ public class Login extends JFrame {
         sLabel.setForeground(UIManager.getColor("Label.foreground"));
 
         JTextField sUser = new JTextField(20);
+        sUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Username");
         sUser.setToolTipText("Username");
         sUser.setCaretColor(accentColor);
 
         JPasswordField sPass = new JPasswordField();
+        sPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
         sPass.setToolTipText("Password");
         sPass.setCaretColor(accentColor);
-        sPass.putClientProperty(FlatClientProperties.STYLE, "showRevealButton: true");
+
         JTextField sEmail = new JTextField(20);
+        sEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Email");
         sEmail.setToolTipText("Email");
         sEmail.setCaretColor(accentColor);
 
         textFieldDesigner(sUser);
-        textFieldDesigner(sPass);
         textFieldDesigner(sEmail);
+        passwordFieldDesigner(sPass);
 
         JButton sButton = new JButton("Sign Up");
         sButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         sButton.setForeground(accentColor);
         sButton.setBackground(panelBg);
-        sButton.setBorder(BorderFactory.createLineBorder(accentColor, 2));
+        buttonDesigner(sButton);
         sButton.setFocusable(false);
-//        sButton.putClientProperty(FlatClientProperties.STYLE, "arc: 15");
         sButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -96,7 +95,7 @@ public class Login extends JFrame {
                 String emailF = sEmail.getText();
 
                 if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
-                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing!", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing!", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -107,13 +106,13 @@ public class Login extends JFrame {
                         ResultSet resultSet = statement.executeQuery();
 
                         if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.WARNING_MESSAGE);
                     sPass.setText("");
                 }
 
@@ -124,26 +123,27 @@ public class Login extends JFrame {
                         ResultSet resultSet = statement.executeQuery();
 
                         if(!emailF.contains("@")) {
-                            JOptionPane.showMessageDialog(contentPanel, "Email must contain \'@\'", "Email Error!", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Email must contain '@'", "Email Error!", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         }
 
                         if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.WARNING_MESSAGE);
                 }
 
+                //Password validation
                 String uppercasePattern = ".*[A-Z].*";
                 String lowercasePattern = ".*[a-z].*";
                 String digitPattern = ".*\\d.*";
-                String symbolPattern = ".*[~`!@#$%^&*()_,.?/\"':;{}|\\<>\\[\\]].*";
-                String passwordToCheck = sPass.getText();
+                String symbolPattern = ".*[~`!@#$%^&*()_,.?/\"':;{}|<>\\[\\]].*";
+                @SuppressWarnings("deprecation") String passwordToCheck = sPass.getText();
 
                 if (!(passwordToCheck.matches(uppercasePattern) &&
                         passwordToCheck.matches(lowercasePattern) &&
@@ -154,6 +154,7 @@ public class Login extends JFrame {
                     return;
                 }
 
+                //noinspection deprecation
                 if(sPass.getText().length() < 8) {
                     JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8!", "Password Error!", JOptionPane.WARNING_MESSAGE);
                     sPass.setText("");
@@ -170,7 +171,7 @@ public class Login extends JFrame {
 
                         if (rowsInserted > 0) {
                             JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
-                            setTitle("Log in");
+                            setTitle("Log In");
                             remove(contentPanel);
                             contentPanel = loginP;
                             add(contentPanel, BorderLayout.CENTER);
@@ -182,8 +183,7 @@ public class Login extends JFrame {
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage());
-                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error.", JOptionPane.ERROR_MESSAGE);
                 }
                 Arrays.fill(toCheck, '\0');
             }
@@ -195,14 +195,19 @@ public class Login extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    setTitle("Login");
+                    setTitle("Log In");
+
+                    sUser.setText("");
+                    sPass.setText("");
+                    sEmail.setText("");
+
                     remove(contentPanel);
                     contentPanel = loginP;
                     add(contentPanel, BorderLayout.CENTER);
                     revalidate();
                     repaint();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(contentPanel, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
 
@@ -227,33 +232,33 @@ public class Login extends JFrame {
 
         //##################################### L O G I N C O D E S ######################################
 
-        loginP = new JPanel(new GridLayout(6, 1,15 ,15));
+        loginP = new JPanel(new GridLayout(5, 1,30,15));
         loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel lLabel = new JLabel("Login", JLabel.CENTER);
+        JLabel lLabel = new JLabel("Log In", JLabel.CENTER);
         lLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
         lLabel.setForeground(UIManager.getColor("Label.foreground"));
 
         JTextField lUser = new JTextField(20);
+        lUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Username");
         lUser.setToolTipText("Username");
         lUser.setCaretColor(accentColor);
 
         JPasswordField lPass = new JPasswordField();
+        lPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
         lPass.setToolTipText("Password");
         lPass.setCaretColor(accentColor);
-        lPass.putClientProperty(FlatClientProperties.STYLE, "showRevealButton: true");
 
         textFieldDesigner(lUser);
-        textFieldDesigner(lPass);
+        passwordFieldDesigner(lPass);
 
-        JButton lButton = new JButton("Login");
+        JButton lButton = new JButton("Log In");
         lButton.setForeground(accentColor);
         lButton.setBackground(panelBg);
-        lButton.setBorder(BorderFactory.createLineBorder(accentColor, 2));
+        buttonDesigner(lButton);
         lButton.setFocusable(false);
         lButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//        lButton.putClientProperty(FlatClientProperties.STYLE, "arc: 15");
         lButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -267,42 +272,38 @@ public class Login extends JFrame {
                 lButton.setForeground(accentColor);
             }
         });
-        lButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                char[] toCheck = lPass.getPassword();
-                String userF = lUser.getText();
-                String passF = new String(toCheck);
+        lButton.addActionListener(e -> {
+            char[] toCheck = lPass.getPassword();
+            String userF = lUser.getText();
+            String passF = new String(toCheck);
 
-                if (userF.isEmpty() || passF.isEmpty()) {
-                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials!", "Login Error!", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                    String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ? AND BINARY Password = ?";
-                    try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
-                        statement.setString(1, userF);
-                        statement.setString(2, passF);
-                        ResultSet resultSet = statement.executeQuery();
-
-                        if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
-
-                            dispose();
-                            new MainPanel(userF); //--After successful login--//
-
-                        } else {
-                            JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password!", "Login Error!", JOptionPane.ERROR_MESSAGE);
-                            lPass.setText("");
-                        }
-                    }
-                } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
-                Arrays.fill(toCheck, '\0');
+            if (userF.isEmpty() || passF.isEmpty()) {
+                JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials!", "Login Error!", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+
+            try (Connection connection = DriverManager.getConnection(url, user, password)) {
+                String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ? AND BINARY Password = ?";
+                try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
+                    statement.setString(1, userF);
+                    statement.setString(2, passF);
+                    ResultSet resultSet = statement.executeQuery();
+
+                    if (resultSet.next()) {
+                        JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
+
+                        dispose();
+                        new MainPanel(userF); //--After successful login--//
+
+                    } else {
+                        JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password!", "Login Error!", JOptionPane.WARNING_MESSAGE);
+                        lPass.setText("");
+                    }
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error.", JOptionPane.ERROR_MESSAGE);
+            }
+            Arrays.fill(toCheck, '\0');
         });
         JLabel lLabelLink = new JLabel("Don't have an account? Sign up here!");
         lLabelLink.setForeground(Color.WHITE);
@@ -312,13 +313,17 @@ public class Login extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 try {
                     setTitle("Sign Up");
+
+                    lUser.setText("");
+                    lPass.setText("");
+
                     remove(contentPanel);
                     contentPanel = signupP;
                     add(contentPanel, BorderLayout.CENTER);
                     revalidate();
                     repaint();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(contentPanel, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
 
@@ -338,17 +343,18 @@ public class Login extends JFrame {
         loginP.add(lButton);
         loginP.add(lLabelLink);
 
-        //##################################### L O G I N C O D E S ######################################
-
-        //Some tricks
-        contentPanel.add(signupP, "SignUp");
-        remove(contentPanel);
-        contentPanel = signupP;
+        //##################################### L O G I N C O D E S #####################################
 
         ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
 
-        add(contentPanel, BorderLayout.CENTER);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                requestFocusInWindow();
+            }
+        });
         setLayout(new BorderLayout());
+        contentPanel = loginP;
         add(contentPanel, BorderLayout.CENTER);
         setIconImage(icon.getImage());
         setResizable(false);
@@ -359,16 +365,26 @@ public class Login extends JFrame {
     }
 
     private void textFieldDesigner(JTextField textField) {
-        textField.setBorder(BorderFactory.createLineBorder(accentColor, 2));
+        textField.putClientProperty(FlatClientProperties.STYLE,
+                "borderWidth: 2; borderColor: #1877F2;");
 
-        textField.setBorder(BorderFactory.createCompoundBorder(
-                textField.getBorder(),
-                new EmptyBorder(5, 10, 5, 10)
-        ));
+        textField.setFont(new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 14));
+        textField.setBackground(panelBg);
+    }
 
-        textField.setFont(new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 16));
+    private void passwordFieldDesigner(JPasswordField passwordField) {
+        passwordField.putClientProperty(FlatClientProperties.STYLE,
+                "showRevealButton: true; showCapsLock: true; borderWidth: 2; borderColor: #1877F2;");
 
-//        textField.putClientProperty(FlatClientProperties.STYLE, "arc: 15");
+        passwordField.setFont(new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 14));
+        passwordField.setBackground(panelBg);
+    }
+
+    private void buttonDesigner(JButton button) {
+        button.putClientProperty(FlatClientProperties.STYLE, "borderWidth: 2; borderColor: #1877F2;");
+
+        button.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 13));
+        button.setBackground(panelBg);
     }
 
     public static void main(String[] args) {
@@ -390,6 +406,11 @@ class MainPanel extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        FlatRobotoFont.install();
+        FlatLaf.registerCustomDefaultsSource("uca.themes");
+        UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
+        FlatMacDarkLaf.setup();
+
         JLabel usernameLabel = new JLabel("@" + username, JLabel.CENTER);
         usernameLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 18));
         usernameLabel.setForeground(Color.WHITE);
@@ -402,6 +423,7 @@ class MainPanel extends JFrame {
         logoutButton.setFocusable(false);
         logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         logoutButton.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
+
         logoutButton.setBackground(Color.WHITE);
         logoutButton.setForeground(Color.ORANGE);
         logoutButton.setFont(new Font("Arial", Font.BOLD, 16));
