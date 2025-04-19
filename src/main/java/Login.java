@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.sql.*;
 import java.util.Arrays;
 
@@ -345,7 +346,9 @@ public class Login extends JFrame {
 
         //##################################### L O G I N C O D E S #####################################
 
-        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
+//        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
+        URL iconURL = getClass().getResource("/icons/messengerwhiteflip.png");
+        ImageIcon icon = new ImageIcon(iconURL);
 
         addMouseListener(new MouseAdapter() {
             @Override
