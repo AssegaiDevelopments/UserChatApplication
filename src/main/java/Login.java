@@ -21,7 +21,8 @@ public class Login extends JFrame {
     private final JPanel signupP;
     private final JPanel loginP;
     private final Color accentColor = Color.decode("#1877F2");
-    private final Color panelBg = UIManager.getColor("Panel.background");
+//    private final Color panelBg = UIManager.getColor("Panel.background");
+    private final Color panelBg = Color.decode("#1C1C1C");
     private static int loginAttempt = 0;
     private static long lockTime = 0;
 
@@ -104,7 +105,7 @@ public class Login extends JFrame {
 
                 //Checks empty field
                 if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
-                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing!", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -116,13 +117,13 @@ public class Login extends JFrame {
                         ResultSet resultSet = statement.executeQuery();
 
                         if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username used", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error!", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Username error: " + ex.getMessage() , "Username Error", JOptionPane.WARNING_MESSAGE);
                     sPass.setText("");
                 }
 
@@ -134,21 +135,21 @@ public class Login extends JFrame {
                         ResultSet resultSet = statement.executeQuery();
 
                         if (!emailF.contains("@")) {
-                            JOptionPane.showMessageDialog(contentPanel, "Email must contain '@'", "Email Error!", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Email must contain '@'", "Email missing character", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         } else if (!emailF.endsWith(".com")) {
-                            JOptionPane.showMessageDialog(contentPanel, "We only accept commercial businesses TLDs", "Email Error!", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "We only accept commercial businesses TLDs", "Email not accepted", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         } else if (resultSet.next()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Email already used.", "Email used", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Email Error: " + ex.getMessage(), "Email Error", JOptionPane.WARNING_MESSAGE);
                 }
 
                 //Password validation
@@ -166,7 +167,7 @@ public class Login extends JFrame {
                     sPass.setText("");
                     return;
                 } else if (sPass.getText().length() < 8) {
-                    JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8!", "Password Error!", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8", "Password Error", JOptionPane.WARNING_MESSAGE);
                     sPass.setText("");
                     return;
                 }
@@ -181,7 +182,7 @@ public class Login extends JFrame {
                         int rowsInserted = statement.executeUpdate();
 
                         if (rowsInserted > 0) {
-                            JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Registration successful", JOptionPane.INFORMATION_MESSAGE);
                             setTitle("Log In");
                             remove(contentPanel);
                             contentPanel = loginP;
@@ -194,7 +195,7 @@ public class Login extends JFrame {
                         }
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error.", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
                 }
                 Arrays.fill(toCheck, '\0');
             }
@@ -298,7 +299,7 @@ public class Login extends JFrame {
 
             //Checks empty field
             if (userF.isEmpty() || passF.isEmpty()) {
-                JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials!", "Login Error!", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials cannot be empty", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -314,7 +315,7 @@ public class Login extends JFrame {
 
                         // Verify the password and recorded hash
                         if (BCrypt.checkpw(passF, hashedPass)) {
-                            JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
                             //Reset attempts
                             loginAttempt = 0;
@@ -323,16 +324,18 @@ public class Login extends JFrame {
                             dispose();
                             new MainPanel(userF);
                         } else {
+                            JOptionPane.showMessageDialog(contentPanel, "Incorrect password.", "Password incorrect", JOptionPane.WARNING_MESSAGE);
                             lPass.setText("");
                             handleFailedAttempt();
                         }
                     } else {
+                        JOptionPane.showMessageDialog(contentPanel, "Username doesn't exist.", "Username cannot found", JOptionPane.WARNING_MESSAGE);
                         lPass.setText("");
                         handleFailedAttempt();
                     }
                 }
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error.", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             }
             Arrays.fill(toCheck, '\0');
         });
@@ -378,7 +381,10 @@ public class Login extends JFrame {
 
 //        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
         URL iconURL = getClass().getResource("/icons/messengerwhiteflip.png");
-        ImageIcon icon = new ImageIcon(iconURL);
+        ImageIcon icon = null;
+        if (iconURL != null) {
+            icon = new ImageIcon(iconURL);
+        }
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -428,9 +434,7 @@ public class Login extends JFrame {
         loginAttempt++;
         if (loginAttempt >= 3) {
             lockTime = System.currentTimeMillis() + (2 * 60 * 1000); // 2 minutes lockout
-            JOptionPane.showMessageDialog(contentPanel, "Too many failed attempts. Please wait 2 minutes.", "Login Locked.", JOptionPane.WARNING_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password!", "Login Error!", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(contentPanel, "Too many failed attempts. Please wait 2 minutes.", "Login Locked", JOptionPane.WARNING_MESSAGE);
         }
     }
 
