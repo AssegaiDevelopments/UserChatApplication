@@ -1,8 +1,9 @@
+//Import necessary libraries
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-
+import org.mindrot.jbcrypt.BCrypt;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,12 +15,17 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class Login extends JFrame {
+
+    //Components initialization
     private JPanel contentPanel;
     private final JPanel signupP;
     private final JPanel loginP;
     private final Color accentColor = Color.decode("#1877F2");
     private final Color panelBg = UIManager.getColor("Panel.background");
+    private static int loginAttempt = 0;
+    private static long lockTime = 0;
 
+    //Class constructor
     public Login() {
         setTitle("Log in");
 
@@ -33,13 +39,13 @@ public class Login extends JFrame {
         final String user = "sql12772723";
         final String password = "p9YsNWBkzK";*/
 
+        //GUI creation and designs
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.DARK_GRAY);
         contentPanel.setSize(700, 300);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        //########################## S I G N U P C O D E S ######################################
-
+        //Sign up part
         signupP = new JPanel(new GridLayout(6, 1, 30, 15));
         signupP.setSize(300, 500);
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -90,16 +96,19 @@ public class Login extends JFrame {
         sButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //Get inputs from fields
                 char[] toCheck = sPass.getPassword();
                 String userF = sUser.getText();
                 String passF = new String(toCheck);
                 String emailF = sEmail.getText();
 
+                //Checks empty field
                 if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
                     JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing!", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
+                //Checks duplicate username
                 try (Connection connection = DriverManager.getConnection(url, user, password)) {
                     String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ?";
                     try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
@@ -117,19 +126,22 @@ public class Login extends JFrame {
                     sPass.setText("");
                 }
 
+                //Checks used emails
                 try (Connection connection = DriverManager.getConnection(url, user, password)) {
                     String selectQuery = "SELECT * FROM credentials WHERE BINARY Email = ?";
                     try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                         statement.setString(1, emailF);
                         ResultSet resultSet = statement.executeQuery();
 
-                        if(!emailF.contains("@")) {
+                        if (!emailF.contains("@")) {
                             JOptionPane.showMessageDialog(contentPanel, "Email must contain '@'", "Email Error!", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
-                        }
-
-                        if (resultSet.next()) {
+                        } else if (!emailF.endsWith(".com")) {
+                            JOptionPane.showMessageDialog(contentPanel, "We only accept commercial businesses TLDs", "Email Error!", JOptionPane.WARNING_MESSAGE);
+                            sPass.setText("");
+                            return;
+                        } else if (resultSet.next()) {
                             JOptionPane.showMessageDialog(contentPanel, "Email already used!", "Email Error!", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
@@ -144,7 +156,7 @@ public class Login extends JFrame {
                 String lowercasePattern = ".*[a-z].*";
                 String digitPattern = ".*\\d.*";
                 String symbolPattern = ".*[~`!@#$%^&*()_,.?/\"':;{}|<>\\[\\]].*";
-                @SuppressWarnings("deprecation") String passwordToCheck = sPass.getText();
+                String passwordToCheck = sPass.getText();
 
                 if (!(passwordToCheck.matches(uppercasePattern) &&
                         passwordToCheck.matches(lowercasePattern) &&
@@ -153,20 +165,18 @@ public class Login extends JFrame {
                     JOptionPane.showMessageDialog(contentPanel, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
                     sPass.setText("");
                     return;
-                }
-
-                //noinspection deprecation
-                if(sPass.getText().length() < 8) {
+                } else if (sPass.getText().length() < 8) {
                     JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8!", "Password Error!", JOptionPane.WARNING_MESSAGE);
                     sPass.setText("");
                     return;
                 }
 
+                //User registration into database
                 try (Connection connection = DriverManager.getConnection(url, user, password)) {
                     String insertQuery = "INSERT INTO credentials (Users, Password, Email) VALUES (?, ?, ?)";
                     try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
                         statement.setString(1, userF);
-                        statement.setString(2, passF);
+                        statement.setString(2, BCrypt.hashpw(passF, BCrypt.gensalt(14)));  //Hash the pass before storing into database
                         statement.setString(3, emailF);
                         int rowsInserted = statement.executeUpdate();
 
@@ -189,6 +199,7 @@ public class Login extends JFrame {
                 Arrays.fill(toCheck, '\0');
             }
         });
+
         JLabel sLabelLink = new JLabel("Already have an account? Log in here!");
         sLabelLink.setForeground(Color.WHITE);
         sLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -222,6 +233,7 @@ public class Login extends JFrame {
                 sLabelLink.setForeground(Color.WHITE);
             }
         });
+
         signupP.add(sLabel);
         signupP.add(sUser);
         signupP.add(sEmail);
@@ -229,10 +241,7 @@ public class Login extends JFrame {
         signupP.add(sButton);
         signupP.add(sLabelLink);
 
-        //########################## S I G N U P C O D E S ######################################
-
-        //##################################### L O G I N C O D E S ######################################
-
+        //Login part
         loginP = new JPanel(new GridLayout(5, 1,30,15));
         loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -274,31 +283,52 @@ public class Login extends JFrame {
             }
         });
         lButton.addActionListener(e -> {
+            //Checks if the user is locked out
+            if (System.currentTimeMillis() < lockTime) {
+                long remainingTime = (lockTime - System.currentTimeMillis()) / 1000;
+                JOptionPane.showMessageDialog(contentPanel, "Too many failed attempts. Please wait " + remainingTime + " seconds.", "Login Locked", JOptionPane.WARNING_MESSAGE);
+                lPass.setText("");
+                return;
+            }
+
+            //Get inputs from fields
             char[] toCheck = lPass.getPassword();
             String userF = lUser.getText();
             String passF = new String(toCheck);
 
+            //Checks empty field
             if (userF.isEmpty() || passF.isEmpty()) {
                 JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials!", "Login Error!", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            //Checks existing user with correct password
             try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ? AND BINARY Password = ?";
+                String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ?";
                 try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                     statement.setString(1, userF);
-                    statement.setString(2, passF);
                     ResultSet resultSet = statement.executeQuery();
 
                     if (resultSet.next()) {
-                        JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
+                        String hashedPass = resultSet.getString("Password");
 
-                        dispose();
-                        new MainPanel(userF); //--After successful login--//
+                        // Verify the password and recorded hash
+                        if (BCrypt.checkpw(passF, hashedPass)) {
+                            JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
 
+                            //Reset attempts
+                            loginAttempt = 0;
+
+                            //After successful login
+                            dispose();
+                            new MainPanel(userF);
+                        } else {
+                            lPass.setText("");
+                            handleFailedAttempt();
+                        }
                     } else {
-                        JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password!", "Login Error!", JOptionPane.WARNING_MESSAGE);
                         lPass.setText("");
+                        handleFailedAttempt();
                     }
                 }
             } catch (SQLException ex) {
@@ -306,6 +336,7 @@ public class Login extends JFrame {
             }
             Arrays.fill(toCheck, '\0');
         });
+
         JLabel lLabelLink = new JLabel("Don't have an account? Sign up here!");
         lLabelLink.setForeground(Color.WHITE);
         lLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -338,13 +369,12 @@ public class Login extends JFrame {
                 lLabelLink.setForeground(Color.WHITE);
             }
         });
+
         loginP.add(lLabel);
         loginP.add(lUser);
         loginP.add(lPass);
         loginP.add(lButton);
         loginP.add(lLabelLink);
-
-        //##################################### L O G I N C O D E S #####################################
 
 //        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
         URL iconURL = getClass().getResource("/icons/messengerwhiteflip.png");
@@ -367,6 +397,7 @@ public class Login extends JFrame {
         setVisible(true);
     }
 
+    //Text Field Designer
     private void textFieldDesigner(JTextField textField) {
         textField.putClientProperty(FlatClientProperties.STYLE,
                 "borderWidth: 2; borderColor: #1877F2;");
@@ -375,6 +406,7 @@ public class Login extends JFrame {
         textField.setBackground(panelBg);
     }
 
+    //Password Field Designer
     private void passwordFieldDesigner(JPasswordField passwordField) {
         passwordField.putClientProperty(FlatClientProperties.STYLE,
                 "showRevealButton: true; showCapsLock: true; borderWidth: 2; borderColor: #1877F2;");
@@ -383,6 +415,7 @@ public class Login extends JFrame {
         passwordField.setBackground(panelBg);
     }
 
+    //Button Designer
     private void buttonDesigner(JButton button) {
         button.putClientProperty(FlatClientProperties.STYLE, "borderWidth: 2; borderColor: #1877F2;");
 
@@ -390,6 +423,18 @@ public class Login extends JFrame {
         button.setBackground(panelBg);
     }
 
+    //Handle failed login attempts
+    private void handleFailedAttempt() {
+        loginAttempt++;
+        if (loginAttempt >= 3) {
+            lockTime = System.currentTimeMillis() + (2 * 60 * 1000); // 2 minutes lockout
+            JOptionPane.showMessageDialog(contentPanel, "Too many failed attempts. Please wait 2 minutes.", "Login Locked.", JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(contentPanel, "Invalid Username or Password!", "Login Error!", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    //Main method
     public static void main(String[] args) {
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("uca.themes");
