@@ -4,9 +4,9 @@ User registration and login - Aren /
 Message sending and receiving - Ocdol and Cyrus
 Online status indicator - Jake and Abenojar
 Chat history per user - Ocdol and Cyrus
-Admin control over users - Aren, Rodriguez, and Ocdol
+Admin control over users - Aren and Rodriguez
 
 GUI - Aren and Rodriguez
 Encrypt and Decrypt or Hash Password - Vince and Jake
-Online Database/Networking - Rodriguez
+Database - Aren
 Program Tester - Vince and Abenojar
