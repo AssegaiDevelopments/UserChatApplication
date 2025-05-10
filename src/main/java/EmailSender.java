@@ -6,8 +6,8 @@ import java.util.Properties;
 public class EmailSender {
 
     public static void sendEmail(String recipient, String subject, String messageText) {
-        final String senderEmail = "hyper5211@gmail.com";
-        final String senderPassword = "oktchtizdbyufxgg";
+        final String senderEmail = "nigga@gmail.com";
+        final String senderPassword = "fuckyounigga";
 
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "true");
