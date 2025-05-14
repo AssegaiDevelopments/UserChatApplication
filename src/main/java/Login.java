@@ -13,6 +13,15 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Login extends JFrame implements KeyListener{
+    //Local database connection
+    private static final String url = "jdbc:mysql://localhost:3306/infoman";
+    private static final String user = "root";
+    private static final String password = "";
+
+    //Online database connection - EXPIRED DATABASE
+        /*final jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
+        final String user = "sql12772723";
+        final String password = "p9YsNWBkzK";*/
 
     //Components initialization
     private JPanel contentPanel;
@@ -25,6 +34,7 @@ public class Login extends JFrame implements KeyListener{
     private static int loginAttempt = 0;
     private static long lockTime = 0;
     private static JButton sButton, lButton;
+
     private final String uppercasePattern = ".*[A-Z].*";
     private final String lowercasePattern = ".*[a-z].*";
     private final String digitPattern = ".*\\d.*";
@@ -33,16 +43,6 @@ public class Login extends JFrame implements KeyListener{
     //Class constructor
     public Login() {
         setTitle("Log in");
-
-        //Local database connection
-        final String url = "jdbc:mysql://localhost:3306/infoman";
-        final String user = "root";
-        final String password = "";
-
-        //Online database connection - EXPIRED DATABASE
-        /*final jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
-        final String user = "sql12772723";
-        final String password = "p9YsNWBkzK";*/
 
         //GUI creation and designs
         contentPanel = new JPanel();
@@ -423,70 +423,7 @@ public class Login extends JFrame implements KeyListener{
         forgotPasswordLink.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                String email = JOptionPane.showInputDialog(contentPanel, "Enter your gmail:", "Forgot Password", JOptionPane.QUESTION_MESSAGE);
-                String subject, message;
-                if (email != null && !email.isEmpty()) {
-                    int[] generatedCode = new int[4];
-                    for (int i = 0; i < 4; ++i) {
-                        generatedCode[i] = new Random().nextInt(10);
-                    }
-
-                    StringBuilder code = new StringBuilder();
-                    for (int n : generatedCode) {
-                        code.append(n);
-                    }
-
-                    subject = "Code Verification - Connect";
-                    message = "Your verification code is: " + code;
-
-                    EmailSender.sendEmail(email, subject, message);
-                    JOptionPane.showMessageDialog(null, "Verification code sent to your email.", "Email Sent", JOptionPane.INFORMATION_MESSAGE);
-
-                    String verifyCode = JOptionPane.showInputDialog(contentPanel, "Enter the code:", "Verify Code", JOptionPane.INFORMATION_MESSAGE);
-                    if (code.toString().equals(verifyCode)) {
-                        String newPassword = JOptionPane.showInputDialog(contentPanel, "Enter your new password:", "Reset Password", JOptionPane.INFORMATION_MESSAGE);
-                        String retypePassword = JOptionPane.showInputDialog(contentPanel, "Retype your new password:", "Reset Password", JOptionPane.INFORMATION_MESSAGE);
-
-                        if (newPassword.equals(retypePassword)) {
-                            if (!(newPassword.matches(uppercasePattern) &&
-                                    newPassword.matches(lowercasePattern) &&
-                                    newPassword.matches(digitPattern) &&
-                                    newPassword.matches(symbolPattern))) {
-                                JOptionPane.showMessageDialog(contentPanel, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
-                            } else if (newPassword.length() < 8 || newPassword.length() > 20) {
-                                JOptionPane.showMessageDialog(contentPanel, "Password length must be between 8 and 20 characters.", "Password Error", JOptionPane.WARNING_MESSAGE);
-                            } else {
-                                try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                                    String updateQuery = "UPDATE credentials SET Passwords = ? WHERE BINARY Emails = ?";
-                                    try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-                                        statement.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(14)));
-                                        statement.setString(2, email);
-
-                                        int rowsUpdated = statement.executeUpdate();
-                                        if (rowsUpdated > 0) {
-                                            subject = "Reset Password Successful - Connect";
-                                            message = "Your password has been reset successfully.";
-
-                                            EmailSender.sendEmail(email, subject,message);
-
-                                            JOptionPane.showMessageDialog(contentPanel, "Password reset successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                                        } else {
-                                            JOptionPane.showMessageDialog(contentPanel, "Failed to reset password. Please try again.", "Failed", JOptionPane.ERROR_MESSAGE);
-                                        }
-                                    }
-                                } catch (SQLException ex) {
-                                    JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                                }
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(contentPanel, "Password do not match.", "Password Error", JOptionPane.WARNING_MESSAGE);
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(contentPanel, "Invalid Code");
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(contentPanel, "Email cannot be empty", "Email Null Error", JOptionPane.ERROR_MESSAGE);
-                }
+                forgotFunc();
             }
 
             @Override
@@ -509,9 +446,12 @@ public class Login extends JFrame implements KeyListener{
 
 //        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
         URL iconURL = getClass().getResource("/icons/messengerwhiteflip.png");
-        ImageIcon icon = null;
+        ImageIcon icon;
         if (iconURL != null) {
             icon = new ImageIcon(iconURL);
+            setIconImage(icon.getImage());
+        } else {
+            JOptionPane.showMessageDialog(null, "Icon not found", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         addMouseListener(new MouseAdapter() {
@@ -521,11 +461,10 @@ public class Login extends JFrame implements KeyListener{
             }
         });
 
+        addKeyListener(this);
         setLayout(new BorderLayout());
         contentPanel = loginP;
         add(contentPanel, BorderLayout.CENTER);
-        setIconImage(icon.getImage());
-        addKeyListener(this);
         setResizable(false);
         setLocation(500, 150);
         setSize(300, 500);
@@ -565,6 +504,74 @@ public class Login extends JFrame implements KeyListener{
         if (loginAttempt >= 3) {
             lockTime = System.currentTimeMillis() + (2 * 60 * 1000); // 2 minutes lockout
             JOptionPane.showMessageDialog(contentPanel, "Too many failed attempts. Please wait 2 minutes.", "Login Locked", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    //Forgot Password Function
+    private void forgotFunc() {
+        String email = JOptionPane.showInputDialog(null, "Enter your gmail:", "Forgot Password", JOptionPane.QUESTION_MESSAGE);
+        String subject, message;
+        if (email != null && !email.isEmpty()) {
+            int[] generatedCode = new int[4];
+            for (int i = 0; i < 4; ++i) {
+                generatedCode[i] = new Random().nextInt(10);
+            }
+
+            StringBuilder code = new StringBuilder();
+            for (int n : generatedCode) {
+                code.append(n);
+            }
+
+            subject = "Code Verification - Connect";
+            message = "Your verification code is: " + code;
+
+            EmailSender.sendEmail(email, subject, message);
+            JOptionPane.showMessageDialog(null, "Verification code sent to your email.", "Email Sent", JOptionPane.INFORMATION_MESSAGE);
+
+            String verifyCode = JOptionPane.showInputDialog(null, "Enter the code:", "Verify Code", JOptionPane.INFORMATION_MESSAGE);
+            if (code.toString().equals(verifyCode)) {
+                String newPassword = JOptionPane.showInputDialog(null, "Enter your new password:", "Reset Password", JOptionPane.INFORMATION_MESSAGE);
+                String retypePassword = JOptionPane.showInputDialog(null, "Retype your new password:", "Reset Password", JOptionPane.INFORMATION_MESSAGE);
+
+                if (newPassword.equals(retypePassword)) {
+                    if (!(newPassword.matches(uppercasePattern) &&
+                            newPassword.matches(lowercasePattern) &&
+                            newPassword.matches(digitPattern) &&
+                            newPassword.matches(symbolPattern))) {
+                        JOptionPane.showMessageDialog(null, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
+                    } else if (newPassword.length() < 8 || newPassword.length() > 20) {
+                        JOptionPane.showMessageDialog(null, "Password length must be between 8 and 20 characters.", "Password Error", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        try (Connection connection = DriverManager.getConnection(url, user, password)) {
+                            String updateQuery = "UPDATE credentials SET Passwords = ? WHERE BINARY Emails = ?";
+                            try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+                                statement.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(14)));
+                                statement.setString(2, email);
+
+                                int rowsUpdated = statement.executeUpdate();
+                                if (rowsUpdated > 0) {
+                                    subject = "Reset Password Successful - Connect";
+                                    message = "Your password has been reset successfully.";
+
+                                    EmailSender.sendEmail(email, subject,message);
+
+                                    JOptionPane.showMessageDialog(null, "Password reset successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Failed to reset password. Please try again.", "Failed", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } catch (SQLException ex) {
+                            JOptionPane.showMessageDialog(null, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Password do not match.", "Password Error", JOptionPane.WARNING_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid Code");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Email cannot be empty", "Email Null Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
