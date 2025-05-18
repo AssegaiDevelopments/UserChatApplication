@@ -6,6 +6,7 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import org.mindrot.jbcrypt.BCrypt;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Dimension;
 import java.awt.event.*;
 import java.net.URL;
 import java.sql.*;
@@ -26,14 +27,17 @@ public class Login extends JFrame implements KeyListener{
     //Components initialization
     private JPanel contentPanel;
     private final JPanel signupP, loginP;
-    private final JLabel sLabel, lLabel, sLabelLink, lLabelLink, forgotPasswordLink;
-    private final JTextField sUser, sEmail, lUser;
-    private final JPasswordField sPass, lPass;
+    private final JLabel sLabel, lLabel, sLabelLink, lLabelLink, forgotPasswordLink, qrCodeLoginLink;
+    private final JTextField sUser, sEmail;
+    private final JPasswordField sPass;
+    public final JTextField lUser;  //for qrcode update
+    public final JPasswordField lPass;  //for qrcode updates
     private final Color accentColor = Color.decode("#1877F2");
     private final Color panelBg = Color.decode("#1C1C1C");
     private static int loginAttempt = 0;
     private static long lockTime = 0;
-    private static JButton sButton, lButton;
+    private static JButton sButton;
+    public static JButton lButton;  //for qrcode updates
 
     private final String uppercasePattern = ".*[A-Z].*";
     private final String lowercasePattern = ".*[a-z].*";
@@ -267,7 +271,7 @@ public class Login extends JFrame implements KeyListener{
         signupP.add(sLabelLink);
 
         //Login part
-        loginP = new JPanel(new GridLayout(6, 1,30,15));
+        loginP = new JPanel(new GridLayout(7, 1,30,15));
         loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -437,12 +441,33 @@ public class Login extends JFrame implements KeyListener{
             }
         });
 
+        qrCodeLoginLink = new JLabel("Log in using QR Code");
+        qrCodeLoginLink.setForeground(Color.WHITE);
+        qrCodeLoginLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        qrCodeLoginLink.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new QRCodeLogin(Login.this);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                qrCodeLoginLink.setForeground(Color.LIGHT_GRAY);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                qrCodeLoginLink.setForeground(Color.WHITE);
+            }
+        });
+
         loginP.add(lLabel);
         loginP.add(lUser);
         loginP.add(lPass);
         loginP.add(lButton);
         loginP.add(lLabelLink);
         loginP.add(forgotPasswordLink);
+        loginP.add(qrCodeLoginLink);
 
 //        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
         URL iconURL = getClass().getResource("/icons/messengerwhiteflip.png");
@@ -511,6 +536,7 @@ public class Login extends JFrame implements KeyListener{
     private void forgotFunc() {
         String email = JOptionPane.showInputDialog(null, "Enter your gmail:", "Forgot Password", JOptionPane.QUESTION_MESSAGE);
         String subject, message;
+
         if (email != null && !email.isEmpty()) {
             int[] generatedCode = new int[4];
             for (int i = 0; i < 4; ++i) {
