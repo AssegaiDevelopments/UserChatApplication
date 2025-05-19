@@ -3,10 +3,10 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.mindrot.jbcrypt.BCrypt;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Dimension;
 import java.awt.event.*;
 import java.net.URL;
 import java.sql.*;
@@ -26,15 +26,18 @@ public class Login extends JFrame implements KeyListener{
 
     //Components initialization
     private JPanel contentPanel;
-    private final JPanel signupP, loginP; //designP
-    private final JLabel sLabel, lLabel, sLabelLink, lLabelLink, forgotPasswordLink;
-    private final JTextField sUser, sEmail, lUser;
-    private final JPasswordField sPass, lPass;
+    private final JPanel signupP, loginP;
+    private final JLabel sLabel, lLabel, sLabelLink, lLabelLink, forgotPasswordLink, qrCodeLoginLink;
+    private final JTextField sUser, sEmail;
+    private final JPasswordField sPass;
+    public final JTextField lUser;  //for qrcode update
+    public final JPasswordField lPass;  //for qrcode updates
     private final Color accentColor = Color.decode("#1877F2");
     private final Color panelBg = Color.decode("#1C1C1C");
     private static int loginAttempt = 0;
     private static long lockTime = 0;
-    private static JButton sButton, lButton;
+    private static JButton sButton;
+    public static JButton lButton;  //for qrcode updates
 
     private final String uppercasePattern = ".*[A-Z].*";
     private final String lowercasePattern = ".*[a-z].*";
@@ -51,58 +54,10 @@ public class Login extends JFrame implements KeyListener{
         contentPanel.setSize(700, 300);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        //design (test phase)
-//        designP = new JPanel() {
-//            private final Image bg = new ImageIcon(getClass().getResource("icons/engimo_bg.png")).getImage();
-//
-//            @Override
-//            protected void paintComponent(Graphics g) {
-//                int panelWidth = getWidth();
-//                int panelHeight = getHeight();
-//
-//                int imgWidth = bg.getWidth(this);
-//                int imgHeight = bg.getHeight(this);
-//
-//                if (imgWidth <= 0 || imgHeight <= 0) return;
-//
-//                // Calculate scale factor to cover the panel
-//                double widthScale = (double) panelWidth / imgWidth;
-//                double heightScale = (double) panelHeight / imgHeight;
-//                double scale = Math.max(widthScale, heightScale); // Use max to *fill* panel
-//
-//                // New image dimensions after scaling
-//                int newWidth = (int) (imgWidth * scale);
-//                int newHeight = (int) (imgHeight * scale);
-//
-//                // Calculate top-left corner to crop center
-//                int x = (panelWidth - newWidth) / 2;
-//                int y = (panelHeight - newHeight) / 2;
-//
-//                // Draw image, will be cropped by panel boundaries
-//                g.drawImage(bg, x, y, newWidth, newHeight, this);
-//            }
-//        };
-
-
         //Sign up part
-        signupP = new JPanel(new GridLayout(7, 1, 0, 22));
-        signupP.setSize(352, 612);
+        signupP = new JPanel(new GridLayout(6, 1, 30, 15));
+        signupP.setSize(300, 500);
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel sErrorLabel = new JLabel();
-        sErrorLabel.setText("");
-        URL errorPath = getClass().getResource("/icons/error.png");
-        if (errorPath != null) {
-            ImageIcon errorIcon = new ImageIcon(errorPath);
-            sErrorLabel.setIcon(errorIcon);
-        } else {
-            System.err.println("Error: Resource not found: /icons/error.png");
-        }
-        sErrorLabel.setOpaque(true);
-        sErrorLabel.setForeground(new Color(255, 255, 255));
-        sErrorLabel.setBackground(new Color(248, 23, 23));
-        sErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), Color.red, 1f, 12));
-        sErrorLabel.setVisible(false);
 
         sLabel = new JLabel("Sign Up", JLabel.CENTER);
         sLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
@@ -165,9 +120,7 @@ public class Login extends JFrame implements KeyListener{
 
                         //Checks empty field
                         if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
-                            //JOptionPane.showMessageDialog(contentPanel, "Please enter valid credentials.", "Credentials Missing", JOptionPane.ERROR_MESSAGE);
-                            sErrorLabel.setText("<html><div style='width:156px'>Please enter credentials, Text field cannot be empty.</div></html>");
-                            sErrorLabel.setVisible(true);
+                            JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
 
@@ -179,27 +132,19 @@ public class Login extends JFrame implements KeyListener{
                                 ResultSet resultSet = statement.executeQuery();
 
                                 if (resultSet.next()) {
-                                    //JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error", JOptionPane.WARNING_MESSAGE);
-                                    sErrorLabel.setText("<html><div style='width:156px'>Username already exists.</div></html>");
-                                    sErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error", JOptionPane.WARNING_MESSAGE);
                                     sPass.setText("");
                                     return;
                                 } else if (userF.length() < 4) {
-                                    //JOptionPane.showMessageDialog(contentPanel, "Username length must not lower than 4", "Username Error", JOptionPane.WARNING_MESSAGE);
-                                    sErrorLabel.setText("<html><div style='width:156px'>Username length cannot be less than 4 characters.</div></html>");
-                                    sErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "Username length must not lower than 4", "Username Error", JOptionPane.WARNING_MESSAGE);
                                     sPass.setText("");
                                     return;
                                 } else if (userF.length() > 20) {
-                                    //JOptionPane.showMessageDialog(contentPanel, "Username length must not exceed 20", "Username Error", JOptionPane.WARNING_MESSAGE);
-                                    sErrorLabel.setText("<html><div style='width:156px'>Username length cannot exceed 20 characters.</div></html>");
-                                    sErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "Username length must not exceed 20", "Username Error", JOptionPane.WARNING_MESSAGE);
                                     sPass.setText("");
                                     return;
                                 } else if (!userF.matches("[a-zA-Z0-9_]+")) {
-                                    //JOptionPane.showMessageDialog(contentPanel, "Username can only contain letters, numbers, and underscores.", "Username Error", JOptionPane.WARNING_MESSAGE);
-                                    sErrorLabel.setText("<html><div style='width:156px'>Username can only contain letters (A-Z), numbers (0-9), and underscores (_).</div></html>");
-                                    sErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "Username can only contain letters, numbers, and underscores.", "Username Error", JOptionPane.WARNING_MESSAGE);
                                     sPass.setText("");
                                     return;
                                 }
@@ -217,15 +162,11 @@ public class Login extends JFrame implements KeyListener{
                                 ResultSet resultSet = statement.executeQuery();
 
                                 if (!emailF.endsWith("@gmail.com")) {
-                                    //JOptionPane.showMessageDialog(contentPanel, "We only accept Gmails and commercial businesses TLDs", "Email not accepted", JOptionPane.WARNING_MESSAGE);
-                                    sErrorLabel.setText("<html><div style='width:156px'>For now, We only accept Gmail. Sorry for the inconvenience.</div></html>");
-                                    sErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "We only accept Google mails and commercial businesses TLDs", "Email not accepted", JOptionPane.WARNING_MESSAGE);
                                     sPass.setText("");
                                     return;
                                 } else if (resultSet.next()) {
-                                    //JOptionPane.showMessageDialog(contentPanel, "Email already used.", "Email used", JOptionPane.WARNING_MESSAGE);
-                                    sErrorLabel.setText("<html><div style='width:156px'>Email already in use.</div></html>");
-                                    sErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "Email already used.", "Email used", JOptionPane.WARNING_MESSAGE);
                                     sPass.setText("");
                                     return;
                                 }
@@ -241,19 +182,15 @@ public class Login extends JFrame implements KeyListener{
                                 passwordToCheck.matches(lowercasePattern) &&
                                 passwordToCheck.matches(digitPattern) &&
                                 passwordToCheck.matches(symbolPattern))) {
-                            //JOptionPane.showMessageDialog(contentPanel, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         } else if (sPass.getText().length() < 8) {
-                            //JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8", "Password Error", JOptionPane.WARNING_MESSAGE);
-                            sErrorLabel.setText("<html><div style='width:156px'>Password length cannot be less than 8 characters.</div></html>");
-                            sErrorLabel.setVisible(true);
+                            JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8", "Password Error", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         } else if (sPass.getText().length() > 20 ) {
-                            //JOptionPane.showMessageDialog(contentPanel, "Password length must not exceed 20", "Password Error", JOptionPane.WARNING_MESSAGE);
-                            sErrorLabel.setText("<html><div style='width:156px'>Password length cannot be more than 20 characters.</div></html>");
-                            sErrorLabel.setVisible(true);
+                            JOptionPane.showMessageDialog(contentPanel, "Password length must not exceed 20", "Password Error", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                             return;
                         }
@@ -277,9 +214,7 @@ public class Login extends JFrame implements KeyListener{
                                     revalidate();
                                     repaint();
                                 } else {
-                                    //JOptionPane.showMessageDialog(contentPanel, "Signup failed.", "Signup Error", JOptionPane.ERROR_MESSAGE);
-                                    sErrorLabel.setText("<html><div style='width:156px'>Sign-up failed, please try again.</div></html>");
-                                    sErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "Signup failed.", "Signup Error", JOptionPane.ERROR_MESSAGE);
                                     sPass.setText("");
                                 }
                             }
@@ -333,27 +268,12 @@ public class Login extends JFrame implements KeyListener{
         signupP.add(sEmail);
         signupP.add(sPass);
         signupP.add(sButton);
-        signupP.add(sErrorLabel);
         signupP.add(sLabelLink);
 
         //Login part
-        loginP = new JPanel(new GridLayout(7, 1, 0, 22));
-        loginP.setSize(352, 612);
+        loginP = new JPanel(new GridLayout(7, 1,30,15));
+        loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel lErrorLabel = new JLabel();
-        lErrorLabel.setText("");
-        if (errorPath != null) {
-            ImageIcon errorIcon = new ImageIcon(errorPath);
-            lErrorLabel.setIcon(errorIcon);
-        } else {
-            System.err.println("Error: Resource not found: /icons/error.png");
-        }
-        lErrorLabel.setOpaque(true);
-        lErrorLabel.setForeground(new Color(255, 255, 255));
-        lErrorLabel.setBackground(new Color(248, 23, 23));
-        lErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), Color.red, 1f, 12));
-        lErrorLabel.setVisible(false);
 
         lLabel = new JLabel("Log In", JLabel.CENTER);
         lLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
@@ -412,9 +332,7 @@ public class Login extends JFrame implements KeyListener{
 
                     //Checks empty field
                     if (userF.isEmpty() || passF.isEmpty()) {
-                        lErrorLabel.setText("<html><div style='width:156px'>Please enter credentials, Text field cannot be empty.</div></html>");
-                        lErrorLabel.setVisible(true);
-                        //JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials cannot be empty", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials cannot be empty", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
@@ -449,16 +367,12 @@ public class Login extends JFrame implements KeyListener{
                                     }
 
                                 } else {
-                                    //JOptionPane.showMessageDialog(contentPanel, "Incorrect password.", "Password incorrect", JOptionPane.WARNING_MESSAGE);
-                                    lErrorLabel.setText("<html><div style='width:156px'>Password incorrect, try again.</div></html>");
-                                    lErrorLabel.setVisible(true);
+                                    JOptionPane.showMessageDialog(contentPanel, "Incorrect password.", "Password incorrect", JOptionPane.WARNING_MESSAGE);
                                     lPass.setText("");
                                     handleFailedAttempt();
                                 }
                             } else {
-                                //JOptionPane.showMessageDialog(contentPanel, "Username doesn't exist.", "Username cannot found", JOptionPane.WARNING_MESSAGE);
-                                lErrorLabel.setText("<html><div style='width:156px'>Username doesn't exist.</div></html>");
-                                lErrorLabel.setVisible(true);
+                                JOptionPane.showMessageDialog(contentPanel, "Username doesn't exist.", "Username cannot found", JOptionPane.WARNING_MESSAGE);
                                 lPass.setText("");
                                 handleFailedAttempt();
                             }
@@ -470,8 +384,6 @@ public class Login extends JFrame implements KeyListener{
                 }
             }).start();
         });
-
-
 
         lLabelLink = new JLabel("Don't have an account? Sign up here!");
         lLabelLink.setForeground(Color.WHITE);
@@ -489,7 +401,6 @@ public class Login extends JFrame implements KeyListener{
                     lPass.setText("");
 
                     remove(contentPanel);
-                    lErrorLabel.setVisible(false);
                     contentPanel = signupP;
                     add(contentPanel, BorderLayout.CENTER);
                     revalidate();
@@ -530,16 +441,36 @@ public class Login extends JFrame implements KeyListener{
             }
         });
 
+        qrCodeLoginLink = new JLabel("Log in using QR Code");
+        qrCodeLoginLink.setForeground(Color.WHITE);
+        qrCodeLoginLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        qrCodeLoginLink.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new QRCodeLogin(Login.this);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                qrCodeLoginLink.setForeground(Color.LIGHT_GRAY);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                qrCodeLoginLink.setForeground(Color.WHITE);
+            }
+        });
+
         loginP.add(lLabel);
         loginP.add(lUser);
         loginP.add(lPass);
         loginP.add(lButton);
-        loginP.add(lErrorLabel);
         loginP.add(lLabelLink);
         loginP.add(forgotPasswordLink);
+        loginP.add(qrCodeLoginLink);
 
-//        ImageIcon icon = new ImageIcon("src/main/resources/icons/Favicon.png");
-        URL iconURL = getClass().getResource("/icons/Favicon.png");
+//        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
+        URL iconURL = getClass().getResource("/icons/messengerwhiteflip.png");
         ImageIcon icon;
         if (iconURL != null) {
             icon = new ImageIcon(iconURL);
@@ -556,13 +487,12 @@ public class Login extends JFrame implements KeyListener{
         });
 
         addKeyListener(this);
-        this.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
         contentPanel = loginP;
         add(contentPanel, BorderLayout.CENTER);
-        //add(designP, BorderLayout.CENTER); testing design / unfinished
-        setResizable(true);
-        setSize(352, 612);
-        setLocationRelativeTo(null);
+        setResizable(false);
+        setLocation(500, 150);
+        setSize(300, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
@@ -606,6 +536,7 @@ public class Login extends JFrame implements KeyListener{
     private void forgotFunc() {
         String email = JOptionPane.showInputDialog(null, "Enter your gmail:", "Forgot Password", JOptionPane.QUESTION_MESSAGE);
         String subject, message;
+
         if (email != null && !email.isEmpty()) {
             int[] generatedCode = new int[4];
             for (int i = 0; i < 4; ++i) {
@@ -660,13 +591,13 @@ public class Login extends JFrame implements KeyListener{
                         }
                     }
                 } else {
-                    JOptionPane.showMessageDialog(null, "Password does not match.", "Password Error", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Password do not match.", "Password Error", JOptionPane.WARNING_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Invalid Code");
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Email cannot be empty", "Empty Email Field", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Email cannot be empty", "Email Null Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
