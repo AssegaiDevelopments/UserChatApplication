@@ -15,14 +15,14 @@ import java.util.Random;
 
 public class Login extends JFrame implements KeyListener{
     //Local database connection
-    private static final String url = "jdbc:mysql://localhost:3306/infoman";
-    private static final String user = "root";
-    private static final String password = "";
+//    private static final String url = "jdbc:mysql://localhost:3306/infoman";
+//    private static final String user = "root";
+//    private static final String password = "";
 
     //Online database connection - EXPIRED DATABASE
-        /*final jdbc:mysql://sql12.freesqldatabase.com:3306/sql12772723
-        final String user = "sql12772723";
-        final String password = "p9YsNWBkzK";*/
+    private final String url = "jdbc:mysql://sql12.freesqldatabase.com:3306/sql12779759";
+    private final String user = "sql12779759";
+    private final String password = "TC1zxJeptv";
 
     //Components initialization
     private JPanel contentPanel;
@@ -44,7 +44,7 @@ public class Login extends JFrame implements KeyListener{
     private final String digitPattern = ".*\\d.*";
     private final String symbolPattern = ".*[~`!@#$%^&*()_,.?/\"':;{}|<>\\[\\]].*";
 
-    //Class constructor
+    //Login constructor
     public Login() {
         setTitle("Log in");
 
@@ -120,13 +120,13 @@ public class Login extends JFrame implements KeyListener{
 
                         //Checks empty field
                         if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials Missing", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(contentPanel, "Please enter a valid Credentials.", "Credentials Missing", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
 
                         //Username validation
                         try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                            String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ?";
+                            String selectQuery = "SELECT * FROM Credentials WHERE BINARY Users = ?";
                             try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                                 statement.setString(1, userF);
                                 ResultSet resultSet = statement.executeQuery();
@@ -156,7 +156,7 @@ public class Login extends JFrame implements KeyListener{
 
                         //Email validation
                         try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                            String selectQuery = "SELECT * FROM credentials WHERE BINARY Emails = ?";
+                            String selectQuery = "SELECT * FROM Credentials WHERE BINARY Emails = ?";
                             try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                                 statement.setString(1, emailF);
                                 ResultSet resultSet = statement.executeQuery();
@@ -197,7 +197,7 @@ public class Login extends JFrame implements KeyListener{
 
                         //User registration into database
                         try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                            String insertQuery = "INSERT INTO credentials (Users, Passwords, Emails, Roles) VALUES (?, ?, ?, ?)";
+                            String insertQuery = "INSERT INTO Credentials (Users, Passwords, Emails, Roles) VALUES (?, ?, ?, ?)";
                             try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
                                 statement.setString(1, userF);
                                 statement.setString(2, BCrypt.hashpw(passF, BCrypt.gensalt(14)));  //Hash the pass before storing into database
@@ -332,13 +332,13 @@ public class Login extends JFrame implements KeyListener{
 
                     //Checks empty field
                     if (userF.isEmpty() || passF.isEmpty()) {
-                        JOptionPane.showMessageDialog(contentPanel, "Please enter a valid credentials.", "Credentials cannot be empty", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(contentPanel, "Please enter a valid Credentials.", "Credentials cannot be empty", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
                     //Checks existing user with correct password
                     try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                        String selectQuery = "SELECT * FROM credentials WHERE BINARY Users = ?";
+                        String selectQuery = "SELECT * FROM Credentials WHERE BINARY Users = ?";
                         try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                             statement.setString(1, userF);
                             ResultSet resultSet = statement.executeQuery();
@@ -356,7 +356,7 @@ public class Login extends JFrame implements KeyListener{
                                     //After successful login
                                     dispose();
 
-                                    if (resultSet.getString("Roles").equalsIgnoreCase("Admin")) {
+                                    if (resultSet.getString("Roles").equalsIgnoreCase("Administrator")) {
                                         //Admin Control
                                         new MainPanel(userF);
                                     } else if (resultSet.getString("Roles").equalsIgnoreCase("User")) {
@@ -569,7 +569,7 @@ public class Login extends JFrame implements KeyListener{
                         JOptionPane.showMessageDialog(null, "Password length must be between 8 and 20 characters.", "Password Error", JOptionPane.WARNING_MESSAGE);
                     } else {
                         try (Connection connection = DriverManager.getConnection(url, user, password)) {
-                            String updateQuery = "UPDATE credentials SET Passwords = ? WHERE BINARY Emails = ?";
+                            String updateQuery = "UPDATE Credentials SET Passwords = ? WHERE BINARY Emails = ?";
                             try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
                                 statement.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(14)));
                                 statement.setString(2, email);
