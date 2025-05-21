@@ -78,6 +78,7 @@ public class Login extends JFrame implements KeyListener{
         sEmail = new JTextField(20);
         sEmail.addKeyListener(this);
         sEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Email");
+
         sEmail.setToolTipText("Email");
         sEmail.setCaretColor(accentColor);
 
