@@ -3,6 +3,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.mindrot.jbcrypt.BCrypt;
 import javax.swing.*;
 import java.awt.*;
@@ -44,6 +45,11 @@ public class Login extends JFrame implements KeyListener{
     private final String digitPattern = ".*\\d.*";
     private final String symbolPattern = ".*[~`!@#$%^&*()_,.?/\"':;{}|<>\\[\\]].*";
 
+    //Parameters
+    int xSize = 352 ;
+    int ySize = 612 ;
+    Color errorColor = new Color(248, 23, 23);
+
     //Login constructor
     public Login() {
         setTitle("Log in");
@@ -55,8 +61,23 @@ public class Login extends JFrame implements KeyListener{
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         //Sign up part
-        signupP = new JPanel(new GridLayout(6, 1, 30, 15));
-        signupP.setSize(300, 500);
+        JLabel sErrorLabel = new JLabel();
+        sErrorLabel.setText("");
+        URL errorPath = getClass().getResource("/icons/error.png");
+        if (errorPath != null) {
+            ImageIcon errorIcon = new ImageIcon(errorPath);
+            sErrorLabel.setIcon(errorIcon);
+        } else {
+            System.err.println("Error: Resource not found: /icons/error.png");
+        }
+        sErrorLabel.setOpaque(true);
+        sErrorLabel.setForeground(new Color(255, 255, 255));
+        sErrorLabel.setBackground(errorColor);
+        sErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), Color.red, 1f, 12));
+        sErrorLabel.setVisible(false);
+
+        signupP = new JPanel(new GridLayout(7, 1, 0, 22));
+        signupP.setSize(352, 612);
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         sLabel = new JLabel("Sign Up", JLabel.CENTER);
@@ -120,7 +141,8 @@ public class Login extends JFrame implements KeyListener{
 
                         //Checks empty field
                         if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
-                            JOptionPane.showMessageDialog(contentPanel, "Please enter a valid Credentials.", "Credentials Missing", JOptionPane.ERROR_MESSAGE);
+                            sErrorLabel.setText("<html><div style='width:156px'>Please enter credentials, Text field cannot be empty.</div></html>");
+                            sErrorLabel.setVisible(true);
                             return;
                         }
 
@@ -132,19 +154,23 @@ public class Login extends JFrame implements KeyListener{
                                 ResultSet resultSet = statement.executeQuery();
 
                                 if (resultSet.next()) {
-                                    JOptionPane.showMessageDialog(contentPanel, "Username already exists!", "Username Error", JOptionPane.WARNING_MESSAGE);
+                                    sErrorLabel.setText("<html><div style='width:156px'>Username already exists.</div></html>");
+                                    sErrorLabel.setVisible(true);
                                     sPass.setText("");
                                     return;
                                 } else if (userF.length() < 4) {
-                                    JOptionPane.showMessageDialog(contentPanel, "Username length must not lower than 4", "Username Error", JOptionPane.WARNING_MESSAGE);
+                                    sErrorLabel.setText("<html><div style='width:156px'>Username length cannot be less than 4 characters.</div></html>");
+                                    sErrorLabel.setVisible(true);
                                     sPass.setText("");
                                     return;
                                 } else if (userF.length() > 20) {
-                                    JOptionPane.showMessageDialog(contentPanel, "Username length must not exceed 20", "Username Error", JOptionPane.WARNING_MESSAGE);
+                                    sErrorLabel.setText("<html><div style='width:156px'>Username length cannot exceed 20 characters.</div></html>");
+                                    sErrorLabel.setVisible(true);
                                     sPass.setText("");
                                     return;
                                 } else if (!userF.matches("[a-zA-Z0-9_]+")) {
-                                    JOptionPane.showMessageDialog(contentPanel, "Username can only contain letters, numbers, and underscores.", "Username Error", JOptionPane.WARNING_MESSAGE);
+                                    sErrorLabel.setText("<html><div style='width:156px'>Username can only contain letters (A-Z), numbers (0-9), and underscores (_).</div></html>");
+                                    sErrorLabel.setVisible(true);
                                     sPass.setText("");
                                     return;
                                 }
@@ -162,11 +188,12 @@ public class Login extends JFrame implements KeyListener{
                                 ResultSet resultSet = statement.executeQuery();
 
                                 if (!emailF.endsWith("@gmail.com")) {
-                                    JOptionPane.showMessageDialog(contentPanel, "We only accept Google mails and commercial businesses TLDs", "Email not accepted", JOptionPane.WARNING_MESSAGE);
+                                    sErrorLabel.setText("<html><div style='width:156px'>For now, We only accept Gmail. Sorry for the inconvenience.</div></html>");
+                                    sErrorLabel.setVisible(true);
                                     sPass.setText("");
-                                    return;
                                 } else if (resultSet.next()) {
-                                    JOptionPane.showMessageDialog(contentPanel, "Email already used.", "Email used", JOptionPane.WARNING_MESSAGE);
+                                    sErrorLabel.setText("<html><div style='width:156px'>Email already in use.</div></html>");
+                                    sErrorLabel.setVisible(true);
                                     sPass.setText("");
                                     return;
                                 }
@@ -182,15 +209,18 @@ public class Login extends JFrame implements KeyListener{
                                 passwordToCheck.matches(lowercasePattern) &&
                                 passwordToCheck.matches(digitPattern) &&
                                 passwordToCheck.matches(symbolPattern))) {
-                            JOptionPane.showMessageDialog(contentPanel, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
+                            sErrorLabel.setText("<html><div style='width:156px'>Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.</div></html>");
+                            sErrorLabel.setVisible(true);
                             sPass.setText("");
                             return;
                         } else if (sPass.getText().length() < 8) {
-                            JOptionPane.showMessageDialog(contentPanel, "Password length must not lower than 8", "Password Error", JOptionPane.WARNING_MESSAGE);
+                            sErrorLabel.setText("<html><div style='width:156px'>Password length cannot be less than 8 characters.</div></html>");
+                            sErrorLabel.setVisible(true);
                             sPass.setText("");
                             return;
                         } else if (sPass.getText().length() > 20 ) {
-                            JOptionPane.showMessageDialog(contentPanel, "Password length must not exceed 20", "Password Error", JOptionPane.WARNING_MESSAGE);
+                            sErrorLabel.setText("<html><div style='width:156px'>Password length cannot exceed 20 characters.</div></html>");
+                            sErrorLabel.setVisible(true);
                             sPass.setText("");
                             return;
                         }
@@ -207,6 +237,7 @@ public class Login extends JFrame implements KeyListener{
 
                                 if (rowsInserted > 0) {
                                     JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Registration successful", JOptionPane.INFORMATION_MESSAGE);
+                                    sErrorLabel.setVisible(false);
                                     setTitle("Log In");
                                     remove(contentPanel);
                                     contentPanel = loginP;
@@ -214,7 +245,8 @@ public class Login extends JFrame implements KeyListener{
                                     revalidate();
                                     repaint();
                                 } else {
-                                    JOptionPane.showMessageDialog(contentPanel, "Signup failed.", "Signup Error", JOptionPane.ERROR_MESSAGE);
+                                    sErrorLabel.setText("<html><div style='width:156px'>Signup failed.</div></html>");
+                                    sErrorLabel.setVisible(true);
                                     sPass.setText("");
                                 }
                             }
@@ -242,6 +274,7 @@ public class Login extends JFrame implements KeyListener{
                     lUser.setText("");
                     lPass.setText("");
 
+                    sErrorLabel.setVisible(false);
                     remove(contentPanel);
                     contentPanel = loginP;
                     add(contentPanel, BorderLayout.CENTER);
@@ -268,12 +301,27 @@ public class Login extends JFrame implements KeyListener{
         signupP.add(sEmail);
         signupP.add(sPass);
         signupP.add(sButton);
+        signupP.add(sErrorLabel);
         signupP.add(sLabelLink);
 
         //Login part
-        loginP = new JPanel(new GridLayout(7, 1,30,15));
+        loginP = new JPanel(new GridLayout(8, 1,30,15));
         loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel lErrorLabel = new JLabel();
+        lErrorLabel.setText("");
+        if (errorPath != null) {
+            ImageIcon errorIcon = new ImageIcon(errorPath);
+            lErrorLabel.setIcon(errorIcon);
+        } else {
+            System.err.println("Error: Resource not found: /icons/error.png");
+        }
+        lErrorLabel.setOpaque(true);
+        lErrorLabel.setForeground(new Color(255, 255, 255));
+        lErrorLabel.setBackground(errorColor);
+        lErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), Color.red, 1f, 12));
+        lErrorLabel.setVisible(false);
 
         lLabel = new JLabel("Log In", JLabel.CENTER);
         lLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
@@ -332,7 +380,8 @@ public class Login extends JFrame implements KeyListener{
 
                     //Checks empty field
                     if (userF.isEmpty() || passF.isEmpty()) {
-                        JOptionPane.showMessageDialog(contentPanel, "Please enter a valid Credentials.", "Credentials cannot be empty", JOptionPane.ERROR_MESSAGE);
+                        lErrorLabel.setText("<html><div style='width:156px'>Please enter credentials, Text field cannot be empty.</div></html>");
+                        lErrorLabel.setVisible(true);
                         return;
                     }
 
@@ -367,12 +416,14 @@ public class Login extends JFrame implements KeyListener{
                                     }
 
                                 } else {
-                                    JOptionPane.showMessageDialog(contentPanel, "Incorrect password.", "Password incorrect", JOptionPane.WARNING_MESSAGE);
+                                    lErrorLabel.setText("<html><div style='width:156px'>Password incorrect, try again.</div></html>");
+                                    lErrorLabel.setVisible(true);
                                     lPass.setText("");
                                     handleFailedAttempt();
                                 }
                             } else {
-                                JOptionPane.showMessageDialog(contentPanel, "Username doesn't exist.", "Username cannot found", JOptionPane.WARNING_MESSAGE);
+                                lErrorLabel.setText("<html><div style='width:156px'>Username doesn't exist.</div></html>");
+                                lErrorLabel.setVisible(true);
                                 lPass.setText("");
                                 handleFailedAttempt();
                             }
@@ -401,6 +452,7 @@ public class Login extends JFrame implements KeyListener{
                     lPass.setText("");
 
                     remove(contentPanel);
+                    lErrorLabel.setVisible(false);
                     contentPanel = signupP;
                     add(contentPanel, BorderLayout.CENTER);
                     revalidate();
@@ -465,12 +517,13 @@ public class Login extends JFrame implements KeyListener{
         loginP.add(lUser);
         loginP.add(lPass);
         loginP.add(lButton);
+        loginP.add(lErrorLabel);
         loginP.add(lLabelLink);
         loginP.add(forgotPasswordLink);
         loginP.add(qrCodeLoginLink);
 
 //        ImageIcon icon = new ImageIcon("src/main/resources/icons/messengerwhiteflip.png");
-        URL iconURL = getClass().getResource("/icons/messengerwhiteflip.png");
+        URL iconURL = getClass().getResource("/icons/Favicon.png");
         ImageIcon icon;
         if (iconURL != null) {
             icon = new ImageIcon(iconURL);
@@ -491,9 +544,9 @@ public class Login extends JFrame implements KeyListener{
         contentPanel = loginP;
         add(contentPanel, BorderLayout.CENTER);
         setResizable(false);
-        setLocation(500, 150);
-        setSize(300, 500);
+        setSize(xSize, ySize);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
