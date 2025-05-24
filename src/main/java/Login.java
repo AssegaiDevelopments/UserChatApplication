@@ -28,7 +28,7 @@ public class Login extends JFrame implements KeyListener{
     //Components initialization
     private JPanel contentPanel;
     private final JPanel signupP, loginP;
-    private final JLabel sLabel, lLabel, sLabelLink, lLabelLink, forgotPasswordLink, qrCodeLoginLink;
+    private final JLabel sLabel, lLabel, sLabelLink, lLabelLink, forgotPasswordLink, qrCodeLoginLink, lErrorLabel, sErrorLabel;
     private final JTextField sUser, sEmail;
     private final JPasswordField sPass;
     public final JTextField lUser;  //for qrcode update
@@ -53,6 +53,7 @@ public class Login extends JFrame implements KeyListener{
     //Login constructor
     public Login() {
         setTitle("Log in");
+        soundPlayer.playSound("loginSound.wav");
 
         //GUI creation and designs
         contentPanel = new JPanel();
@@ -61,13 +62,14 @@ public class Login extends JFrame implements KeyListener{
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         //Sign up part
-        JLabel sErrorLabel = new JLabel();
+        sErrorLabel = new JLabel();
         sErrorLabel.setText("");
         URL errorPath = getClass().getResource("/icons/error.png");
         if (errorPath != null) {
             ImageIcon errorIcon = new ImageIcon(errorPath);
             sErrorLabel.setIcon(errorIcon);
         } else {
+            soundPlayer.playSound("errorSound.wav");
             System.err.println("Error: Resource not found: /icons/error.png");
         }
         sErrorLabel.setOpaque(true);
@@ -142,7 +144,9 @@ public class Login extends JFrame implements KeyListener{
                         //Checks empty field
                         if (userF.isEmpty() || passF.isEmpty() || emailF.isEmpty()) {
                             sErrorLabel.setText("<html><div style='width:156px'>Please enter credentials, Text field cannot be empty.</div></html>");
+                            soundPlayer.playSound("errorSound.wav");
                             sErrorLabel.setVisible(true);
+                            clearErrorDisplay();
                             return;
                         }
 
@@ -155,27 +159,36 @@ public class Login extends JFrame implements KeyListener{
 
                                 if (resultSet.next()) {
                                     sErrorLabel.setText("<html><div style='width:156px'>Username already exists.</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     sErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     sPass.setText("");
                                     return;
                                 } else if (userF.length() < 4) {
                                     sErrorLabel.setText("<html><div style='width:156px'>Username length cannot be less than 4 characters.</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     sErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     sPass.setText("");
                                     return;
                                 } else if (userF.length() > 20) {
                                     sErrorLabel.setText("<html><div style='width:156px'>Username length cannot exceed 20 characters.</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     sErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     sPass.setText("");
                                     return;
                                 } else if (!userF.matches("[a-zA-Z0-9_]+")) {
                                     sErrorLabel.setText("<html><div style='width:156px'>Username can only contain letters (A-Z), numbers (0-9), and underscores (_).</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     sErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     sPass.setText("");
                                     return;
                                 }
                             }
                         } catch (SQLException ex) {
+                            soundPlayer.playSound("errorSound.wav");
                             JOptionPane.showMessageDialog(contentPanel, "Username error: " + ex.getMessage() , "Username Error", JOptionPane.WARNING_MESSAGE);
                             sPass.setText("");
                         }
@@ -189,16 +202,21 @@ public class Login extends JFrame implements KeyListener{
 
                                 if (!emailF.endsWith("@gmail.com")) {
                                     sErrorLabel.setText("<html><div style='width:156px'>For now, We only accept Gmail. Sorry for the inconvenience.</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     sErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     sPass.setText("");
                                 } else if (resultSet.next()) {
                                     sErrorLabel.setText("<html><div style='width:156px'>Email already in use.</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     sErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     sPass.setText("");
                                     return;
                                 }
                             }
                         } catch (SQLException ex) {
+                            soundPlayer.playSound("errorSound.wav");
                             JOptionPane.showMessageDialog(contentPanel, "Email Error: " + ex.getMessage(), "Email Error", JOptionPane.WARNING_MESSAGE);
                         }
 
@@ -210,17 +228,23 @@ public class Login extends JFrame implements KeyListener{
                                 passwordToCheck.matches(digitPattern) &&
                                 passwordToCheck.matches(symbolPattern))) {
                             sErrorLabel.setText("<html><div style='width:156px'>Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.</div></html>");
+                            soundPlayer.playSound("errorSound.wav");
                             sErrorLabel.setVisible(true);
+                            clearErrorDisplay();
                             sPass.setText("");
                             return;
                         } else if (sPass.getText().length() < 8) {
                             sErrorLabel.setText("<html><div style='width:156px'>Password length cannot be less than 8 characters.</div></html>");
                             sErrorLabel.setVisible(true);
+                            clearErrorDisplay();
+                            soundPlayer.playSound("errorSound.wav");
                             sPass.setText("");
                             return;
                         } else if (sPass.getText().length() > 20 ) {
                             sErrorLabel.setText("<html><div style='width:156px'>Password length cannot exceed 20 characters.</div></html>");
+                            soundPlayer.playSound("errorSound.wav");
                             sErrorLabel.setVisible(true);
+                            clearErrorDisplay();
                             sPass.setText("");
                             return;
                         }
@@ -236,6 +260,7 @@ public class Login extends JFrame implements KeyListener{
                                 int rowsInserted = statement.executeUpdate();
 
                                 if (rowsInserted > 0) {
+                                    soundPlayer.playSound("loginSound.wav");
                                     JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Registration successful", JOptionPane.INFORMATION_MESSAGE);
                                     sErrorLabel.setVisible(false);
                                     setTitle("Log In");
@@ -246,11 +271,14 @@ public class Login extends JFrame implements KeyListener{
                                     repaint();
                                 } else {
                                     sErrorLabel.setText("<html><div style='width:156px'>Signup failed.</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     sErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     sPass.setText("");
                                 }
                             }
                         } catch (SQLException ex) {
+                            soundPlayer.playSound("errorSound.wav");
                             JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
                         }
                         Arrays.fill(toCheck, '\0');
@@ -267,6 +295,7 @@ public class Login extends JFrame implements KeyListener{
             public void mouseClicked(MouseEvent e) {
                 try {
                     setTitle("Log In");
+                    soundPlayer.playSound("loginSound.wav");
 
                     sUser.setText("");
                     sPass.setText("");
@@ -281,6 +310,7 @@ public class Login extends JFrame implements KeyListener{
                     revalidate();
                     repaint();
                 } catch (Exception ex) {
+                    soundPlayer.playSound("errorSound.wav");
                     JOptionPane.showMessageDialog(contentPanel, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -309,12 +339,13 @@ public class Login extends JFrame implements KeyListener{
         loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel lErrorLabel = new JLabel();
+        lErrorLabel = new JLabel();
         lErrorLabel.setText("");
         if (errorPath != null) {
             ImageIcon errorIcon = new ImageIcon(errorPath);
             lErrorLabel.setIcon(errorIcon);
         } else {
+            soundPlayer.playSound("errorSound.wav");
             System.err.println("Error: Resource not found: /icons/error.png");
         }
         lErrorLabel.setOpaque(true);
@@ -368,6 +399,7 @@ public class Login extends JFrame implements KeyListener{
                     //Checks if the user is locked out
                     if (System.currentTimeMillis() < lockTime) {
                         long remainingTime = (lockTime - System.currentTimeMillis()) / 1000;
+                        soundPlayer.playSound("errorSound.wav");
                         JOptionPane.showMessageDialog(contentPanel, "Too many failed attempts. Please wait " + remainingTime + " seconds.", "Login Locked", JOptionPane.WARNING_MESSAGE);
                         lPass.setText("");
                         return;
@@ -381,7 +413,10 @@ public class Login extends JFrame implements KeyListener{
                     //Checks empty field
                     if (userF.isEmpty() || passF.isEmpty()) {
                         lErrorLabel.setText("<html><div style='width:156px'>Please enter credentials, Text field cannot be empty.</div></html>");
+                        soundPlayer.playSound("errorSound.wav");
                         lErrorLabel.setVisible(true);
+                        clearErrorDisplay();
+                        handleFailedAttempt();
                         return;
                     }
 
@@ -397,38 +432,48 @@ public class Login extends JFrame implements KeyListener{
 
                                 // Verify the password and recorded hash
                                 if (BCrypt.checkpw(passF, hashedPass)) {
+                                    soundPlayer.playSound("loginSound.wav");
                                     JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
                                     //Reset attempts
                                     loginAttempt = 0;
 
                                     //After successful login
+                                    soundPlayer.playSound("offlineSound.wav");
                                     dispose();
 
                                     if (resultSet.getString("Roles").equalsIgnoreCase("Administrator")) {
                                         //Admin Control
+                                        soundPlayer.playSound("loginSound.wav");
                                         new MainPanel(userF);
                                     } else if (resultSet.getString("Roles").equalsIgnoreCase("User")) {
                                         //Code ni Rommards
+                                        soundPlayer.playSound("loginSound.wav");
                                         new MainPanel(userF);
                                     } else {
+                                        soundPlayer.playSound("loginSound.wav");
                                         new MainPanel(userF);
                                     }
 
                                 } else {
                                     lErrorLabel.setText("<html><div style='width:156px'>Password incorrect, try again.</div></html>");
+                                    soundPlayer.playSound("errorSound.wav");
                                     lErrorLabel.setVisible(true);
+                                    clearErrorDisplay();
                                     lPass.setText("");
                                     handleFailedAttempt();
                                 }
                             } else {
                                 lErrorLabel.setText("<html><div style='width:156px'>Username doesn't exist.</div></html>");
+                                soundPlayer.playSound("errorSound.wav");
                                 lErrorLabel.setVisible(true);
+                                clearErrorDisplay();
                                 lPass.setText("");
                                 handleFailedAttempt();
                             }
                         }
                     } catch (SQLException ex) {
+                        soundPlayer.playSound("errorSound.wav");
                         JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
                     }
                     Arrays.fill(toCheck, '\0');
@@ -444,6 +489,7 @@ public class Login extends JFrame implements KeyListener{
             public void mouseClicked(MouseEvent e) {
                 try {
                     setTitle("Sign Up");
+                    soundPlayer.playSound("loginSound.wav");
 
                     sUser.setText("");
                     sPass.setText("");
@@ -451,13 +497,14 @@ public class Login extends JFrame implements KeyListener{
                     lUser.setText("");
                     lPass.setText("");
 
-                    remove(contentPanel);
                     lErrorLabel.setVisible(false);
+                    remove(contentPanel);
                     contentPanel = signupP;
                     add(contentPanel, BorderLayout.CENTER);
                     revalidate();
                     repaint();
                 } catch (Exception ex) {
+                    soundPlayer.playSound("errorSound.wav");
                     JOptionPane.showMessageDialog(contentPanel, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -500,6 +547,7 @@ public class Login extends JFrame implements KeyListener{
             @Override
             public void mouseClicked(MouseEvent e) {
                 new QRCodeLogin(Login.this);
+                soundPlayer.playSound("loginSound.wav");
             }
 
             @Override
@@ -529,6 +577,7 @@ public class Login extends JFrame implements KeyListener{
             icon = new ImageIcon(iconURL);
             setIconImage(icon.getImage());
         } else {
+            soundPlayer.playSound("errorSound.wav");
             JOptionPane.showMessageDialog(null, "Icon not found", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -581,12 +630,14 @@ public class Login extends JFrame implements KeyListener{
         loginAttempt++;
         if (loginAttempt >= 3) {
             lockTime = System.currentTimeMillis() + (2 * 60 * 1000); // 2 minutes lockout
+            soundPlayer.playSound("errorSound.wav");
             JOptionPane.showMessageDialog(contentPanel, "Too many failed attempts. Please wait 2 minutes.", "Login Locked", JOptionPane.WARNING_MESSAGE);
         }
     }
 
     //Forgot Password Function
     private void forgotFunc() {
+        soundPlayer.playSound("loginSound.wav");
         String email = JOptionPane.showInputDialog(null, "Enter your gmail:", "Forgot Password", JOptionPane.QUESTION_MESSAGE);
         String subject, message;
 
@@ -605,6 +656,7 @@ public class Login extends JFrame implements KeyListener{
             message = "Your verification code is: " + code;
 
             EmailSender.sendEmail(email, subject, message);
+            soundPlayer.playSound("sendSound.wav");
             JOptionPane.showMessageDialog(null, "Verification code sent to your email.", "Email Sent", JOptionPane.INFORMATION_MESSAGE);
 
             String verifyCode = JOptionPane.showInputDialog(null, "Enter the code:", "Verify Code", JOptionPane.INFORMATION_MESSAGE);
@@ -617,8 +669,10 @@ public class Login extends JFrame implements KeyListener{
                             newPassword.matches(lowercasePattern) &&
                             newPassword.matches(digitPattern) &&
                             newPassword.matches(symbolPattern))) {
+                        soundPlayer.playSound("errorSound.wav");
                         JOptionPane.showMessageDialog(null, "Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.", "Password Error", JOptionPane.WARNING_MESSAGE);
                     } else if (newPassword.length() < 8 || newPassword.length() > 20) {
+                        soundPlayer.playSound("errorSound.wav");
                         JOptionPane.showMessageDialog(null, "Password length must be between 8 and 20 characters.", "Password Error", JOptionPane.WARNING_MESSAGE);
                     } else {
                         try (Connection connection = DriverManager.getConnection(url, user, password)) {
@@ -634,23 +688,39 @@ public class Login extends JFrame implements KeyListener{
 
                                     EmailSender.sendEmail(email, subject,message);
 
+                                    soundPlayer.playSound("sendSound.wav");
                                     JOptionPane.showMessageDialog(null, "Password reset successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                                 } else {
+                                    soundPlayer.playSound("errorSound.wav");
                                     JOptionPane.showMessageDialog(null, "Failed to reset password. Please try again.", "Failed", JOptionPane.ERROR_MESSAGE);
                                 }
                             }
                         } catch (SQLException ex) {
+                            soundPlayer.playSound("errorSound.wav");
                             JOptionPane.showMessageDialog(null, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
+                    soundPlayer.playSound("errorSound.wav");
                     JOptionPane.showMessageDialog(null, "Password do not match.", "Password Error", JOptionPane.WARNING_MESSAGE);
                 }
             } else {
+                soundPlayer.playSound("errorSound.wav");
                 JOptionPane.showMessageDialog(null, "Invalid Code");
             }
         } else {
+            soundPlayer.playSound("errorSound.wav");
             JOptionPane.showMessageDialog(null, "Email cannot be empty", "Email Null Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void clearErrorDisplay() {
+        try {
+            Thread.sleep(5000);
+            lErrorLabel.setVisible(false);
+            sErrorLabel.setVisible(false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -719,6 +789,7 @@ class MainPanel extends JFrame{
         logoutButton.setPreferredSize(new Dimension(50, 50));
         logoutButton.setFocusable(false);
         logoutButton.addActionListener(e -> {
+            soundPlayer.playSound("offlineSound.wav");
             JOptionPane.showMessageDialog(this, "You are logged out!", "Logout", JOptionPane.INFORMATION_MESSAGE);
             dispose();
             new Login();

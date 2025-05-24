@@ -40,7 +40,6 @@ public class QRCodeLogin extends JFrame {
         add(webcamPanel, BorderLayout.CENTER);
 
         setBackground(background);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocation(450, 150);
         setResizable(false);
         setSize(400, 500);
