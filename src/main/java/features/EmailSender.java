@@ -1,13 +1,14 @@
+package features;
+
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.swing.*;
 import java.util.Properties;
+import static constants.EmailSenderConstants.*;
 
 public class EmailSender {
 
     public static void sendEmail(String recipient, String subject, String messageText) {
-        final String senderEmail = "nigga@gmail.com";
-        final String senderPassword = "fuckyounigga";
 
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "true");

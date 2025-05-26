@@ -4,11 +4,11 @@ import org.opencv.imgproc.Imgproc;
 import com.google.zxing.*;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import static constants.Colors.backgroundColor;
 
 public class QRCodeLogin extends JFrame {
 
@@ -16,7 +16,6 @@ public class QRCodeLogin extends JFrame {
     private JPanel panel;
     private WebcamPanel webcamPanel;
     private Login loginInstance;
-    private final Color background = Color.decode("#1C1C1C");
 
     public QRCodeLogin(Login loginInstance) {
         super("QR Code Login");
@@ -32,14 +31,14 @@ public class QRCodeLogin extends JFrame {
         label.setText("Place the QR Code in front of the camera");
         label.setForeground(Color.WHITE);
         panel.add(label);
-        panel.setBackground(background);
+        panel.setBackground(backgroundColor);
         add(panel, BorderLayout.NORTH);
 
         webcamPanel = new WebcamPanel();
-        webcamPanel.setBackground(background);
+        webcamPanel.setBackground(backgroundColor);
         add(webcamPanel, BorderLayout.CENTER);
 
-        setBackground(background);
+        setBackground(backgroundColor);
         setLocation(450, 150);
         setResizable(false);
         setSize(400, 500);

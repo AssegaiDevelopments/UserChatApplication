@@ -1,14 +1,16 @@
+package features;
+
 import javax.swing.*;
 import java.io.File;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.net.URL;
 
-public class soundPlayer {
+public class SoundPlayer {
 
-    public static void playSound(String soundFilePath) {
+    private static void playSound(String soundFilePath) {
         try {
-            URL soundUrl = soundPlayer.class.getResource("/sounds/" + soundFilePath);
+            URL soundUrl = SoundPlayer.class.getResource("/sounds/" + soundFilePath);
             File soundFile;
 
             if (soundUrl != null) {
@@ -28,5 +30,29 @@ public class soundPlayer {
         } catch (Exception ex) {
              JOptionPane.showMessageDialog(null, "An error occurred while playing sound.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    public static void errorSound() {
+        playSound("errorSound.wav");
+    }
+
+    public static void loginSound() {
+        playSound("loginSound.wav");
+    }
+
+    public static void messageReceiveSound() {
+        playSound("messageReceive.wav");
+    }
+
+    public static void offlineSound() {
+        playSound("offlineSound.wav");
+    }
+
+    public static void onlineSound() {
+        playSound("onlineSound.wav");
+    }
+
+    public static void sendSound() {
+        playSound("sendSound.wav");
     }
 }
