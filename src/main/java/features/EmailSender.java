@@ -4,7 +4,7 @@ import javax.mail.*;
 import javax.mail.internet.*;
 import javax.swing.*;
 import java.util.Properties;
-import static constants.EmailSenderConstants.*;
+import static constants.EmailSenderCredentials.*;
 
 public class EmailSender {
 

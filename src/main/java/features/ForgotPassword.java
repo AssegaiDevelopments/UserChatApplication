@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Random;
-import static constants.regexConstants.*;
+import static constants.RegexConstants.*;
 import static features.SoundPlayer.*;
 
 public class ForgotPassword {
@@ -24,7 +24,7 @@ public class ForgotPassword {
     public static void forgotFunc() {
         String email = JOptionPane.showInputDialog(null, "Enter your Gmail:", "Forgot Password", JOptionPane.QUESTION_MESSAGE);
         if (email == null || email.isEmpty()) {
-
+            errorSound();
             JOptionPane.showMessageDialog(null, "Email cannot be empty", "Email Null Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -43,6 +43,7 @@ public class ForgotPassword {
         String message = "Your verification code is: " + code;
 
         EmailSender.sendEmail(email, subject, message);
+        sendSound();
         JOptionPane.showMessageDialog(null, "Verification code sent to your email.", "Email Sent", JOptionPane.INFORMATION_MESSAGE);
 
         String verifyCode = JOptionPane.showInputDialog(null, "Enter the code:", "Verify Code", JOptionPane.INFORMATION_MESSAGE);
@@ -91,10 +92,7 @@ public class ForgotPassword {
     }
 
     private static boolean isValidPassword(String password) {
-        return password.matches(UPPERCASE_PATTERN) &&
-               password.matches(LOWERCASE_PATTERN) &&
-               password.matches(DIGIT_PATTERN) &&
-               password.matches(SYMBOL_PATTERN) &&
+        return password.matches(COMPLEX_PASSWORD_PATTERN) &&
                password.length() >= 8 &&
                password.length() <= 20;
     }

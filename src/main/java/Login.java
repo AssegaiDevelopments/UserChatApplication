@@ -12,7 +12,7 @@ import java.awt.event.*;
 import java.net.URL;
 import java.sql.*;
 import java.util.Arrays;
-import static constants.regexConstants.*;
+import static constants.RegexConstants.*;
 import static constants.DatabaseConstants.*;
 import static constants.Colors.*;
 import static features.SoundPlayer.*;
@@ -38,7 +38,7 @@ public class Login extends JFrame implements KeyListener{
         setTitle("Log in");
         loginSound();
 
-        //GUI creation and designs
+        // -- GUI creation and designs --
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.DARK_GRAY);
         contentPanel.setSize(700, 300);
@@ -59,17 +59,17 @@ public class Login extends JFrame implements KeyListener{
         sUser.setToolTipText("Username");
         sUser.setCaretColor(accentColor);
 
-        sPass = new JPasswordField();
-        sPass.addKeyListener(this);
-        sPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
-        sPass.setToolTipText("Password");
-        sPass.setCaretColor(accentColor);
-
         sEmail = new JTextField(20);
         sEmail.addKeyListener(this);
         sEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Email");
         sEmail.setToolTipText("Email");
         sEmail.setCaretColor(accentColor);
+
+        sPass = new JPasswordField();
+        sPass.addKeyListener(this);
+        sPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
+        sPass.setToolTipText("Password");
+        sPass.setCaretColor(accentColor);
 
         textFieldDesigner(sUser);
         textFieldDesigner(sEmail);
@@ -169,7 +169,7 @@ public class Login extends JFrame implements KeyListener{
 
         lUser = new JTextField(20);
         lUser.addKeyListener(this);
-        lUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Username");
+        lUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Username or Email");
         lUser.setToolTipText("Username");
         lUser.setCaretColor(accentColor);
 
@@ -227,13 +227,11 @@ public class Login extends JFrame implements KeyListener{
                 try {
                     setTitle("Sign Up");
                     loginSound();
-
                     sUser.setText("");
                     sPass.setText("");
                     sEmail.setText("");
                     lUser.setText("");
                     lPass.setText("");
-
                     lErrorLabel.setVisible(false);
                     remove(contentPanel);
                     contentPanel = signupP;
@@ -381,7 +379,7 @@ public class Login extends JFrame implements KeyListener{
                     clearErrorDisplay();
                     sPass.setText("");
                     return;
-                } else if (!userF.matches("[a-zA-Z0-9_]+")) {
+                } else if (!userF.matches(COMPLEX_PASSWORD_PATTERN)) {
                     sErrorLabel.setText("<html><div style='width:156px'>Username can only contain letters (A-Z), numbers (0-9), and underscores (_).</div></html>");
                     errorSound();
                     sErrorLabel.setVisible(true);
@@ -426,10 +424,7 @@ public class Login extends JFrame implements KeyListener{
         //Password validation
         String passwordToCheck = sPass.getText();
 
-        if (!(passwordToCheck.matches(UPPERCASE_PATTERN) &&
-                passwordToCheck.matches(LOWERCASE_PATTERN) &&
-                passwordToCheck.matches(DIGIT_PATTERN) &&
-                passwordToCheck.matches(SYMBOL_PATTERN))) {
+        if (!passwordToCheck.matches(COMPLEX_PASSWORD_PATTERN)) {
             sErrorLabel.setText("<html><div style='width:156px'>Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one symbol.</div></html>");
             errorSound();
             sErrorLabel.setVisible(true);
@@ -512,18 +507,18 @@ public class Login extends JFrame implements KeyListener{
             return;
         }
 
+        boolean isEmail = userF.endsWith("@gmail.com");
+
         //Checks existing user with correct password
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String selectQuery = "SELECT * FROM Credentials WHERE BINARY Users = ?";
+            String selectQuery = isEmail ? "SELECT * FROM Credentials WHERE BINARY Emails = ?" : "SELECT * FROM Credentials WHERE BINARY Users = ?";
             try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                 statement.setString(1, userF);
                 ResultSet resultSet = statement.executeQuery();
 
                 if (resultSet.next()) {
-                    String hashedPass = resultSet.getString("Passwords");
-
-                    // Verify the password and recorded hash
-                    if (BCrypt.checkpw(passF, hashedPass)) {
+                    // Verify the input password and recorded hash
+                    if (BCrypt.checkpw(passF, resultSet.getString("Passwords"))) {
                         loginSound();
                         JOptionPane.showMessageDialog(contentPanel, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
