@@ -35,7 +35,7 @@ public class Login extends JFrame implements KeyListener{
 
     //Login constructor
     public Login() {
-        setTitle("Log in");
+        setTitle("Log In");
         loginSound();
 
         // -- GUI creation and designs --
@@ -170,7 +170,7 @@ public class Login extends JFrame implements KeyListener{
         lUser = new JTextField(20);
         lUser.addKeyListener(this);
         lUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Username or Email");
-        lUser.setToolTipText("Username");
+        lUser.setToolTipText("Username or Email");
         lUser.setCaretColor(accentColor);
 
         lPass = new JPasswordField();
