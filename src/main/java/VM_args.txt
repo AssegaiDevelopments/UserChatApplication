@@ -1,2 +1,2 @@
--Djava.library.path=lib/opencv-4.8.1-0/nu/pattern/opencv/windows/x86_64
+-Djava.library.path=C:\Users\Administrator\.m2\repository\org\openpnp\opencv\4.8.1-0\nu\pattern\opencv\windows\x86_64
 --enable-native-access=ALL-UNNAMED
