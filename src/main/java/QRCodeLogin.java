@@ -96,7 +96,7 @@ public class QRCodeLogin extends JFrame {
     }
 
     static {
-        System.loadLibrary("opencv_java4110");
+        System.loadLibrary("opencv_java481");
     }
 
     private static String scanQRCode(Mat frame) {
