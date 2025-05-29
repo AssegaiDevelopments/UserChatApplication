@@ -1,6 +1,6 @@
 //-- Java Final Project Roles --//
 
-User registration and login - Aren /
+User registration and login - Aren
 Message sending and receiving - Ocdol and Cyrus
 Online status indicator - Jake and Abenojar
 Chat history per user - Ocdol and Cyrus
