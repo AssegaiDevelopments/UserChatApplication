@@ -39,6 +39,9 @@ public class Login extends JFrame implements KeyListener{
         loginSound();
 
         // -- GUI creation and designs --
+        URL logoURL = getClass().getResource("/icons/Favicon.png");
+        ImageIcon logo = new ImageIcon(logoURL);
+
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.DARK_GRAY);
         contentPanel.setSize(700, 300);
@@ -50,6 +53,8 @@ public class Login extends JFrame implements KeyListener{
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         sLabel = new JLabel("Sign Up", JLabel.CENTER);
+        sLabel.setIcon(logo);
+        sLabel.setIconTextGap(10);
         sLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
         sLabel.setForeground(UIManager.getColor("Label.foreground"));
 
@@ -163,6 +168,8 @@ public class Login extends JFrame implements KeyListener{
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         lLabel = new JLabel("Log In", JLabel.CENTER);
+        lLabel.setIcon(logo);
+        lLabel.setIconTextGap(10);
         lLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
         lLabel.setForeground(UIManager.getColor("Label.foreground"));
 
@@ -304,6 +311,7 @@ public class Login extends JFrame implements KeyListener{
         loginP.add(forgotPasswordLink);
         loginP.add(qrCodeLoginLink);
 
+        //sets the icon for the JFrame
         URL iconURL = getClass().getResource("/icons/Favicon.png");
         ImageIcon icon;
         if (iconURL != null) {
