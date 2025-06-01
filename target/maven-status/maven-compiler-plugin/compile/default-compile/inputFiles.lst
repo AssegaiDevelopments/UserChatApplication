@@ -1,5 +1,10 @@
-C:\Users\Administrator\Desktop\Java\UserChatApplication\src\main\java\ChatClient.java
-C:\Users\Administrator\Desktop\Java\UserChatApplication\src\main\java\ChatServer.java
-C:\Users\Administrator\Desktop\Java\UserChatApplication\src\main\java\Login.java
-C:\Users\Administrator\Desktop\Java\UserChatApplication\src\main\java\Main.java
-C:\Users\Administrator\Desktop\Java\UserChatApplication\src\main\java\ModifiedFlatMacDarkLaf.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\constants\Colors.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\constants\DatabaseConstants.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\constants\EmailSenderCredentials.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\constants\RegexConstants.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\features\EmailSender.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\features\ForgotPassword.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\features\QRCodeGenerator.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\features\SoundPlayer.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\Login.java
+C:\Users\xd\Documents\Java\testsite\UserChatApplication\src\main\java\QRCodeLogin.java

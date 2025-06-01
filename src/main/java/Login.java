@@ -51,7 +51,11 @@ public class Login extends JFrame implements KeyListener{
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         URL logoURL = getClass().getResource("/icons/Favicon.png");
-        ImageIcon logo = new ImageIcon(logoURL);
+        ImageIcon logo = null;
+        if (logoURL != null) {
+            logo = new ImageIcon(logoURL);
+        }
+
 
         sLabel = new JLabel("Sign Up", JLabel.CENTER);
         sLabel.setIcon(logo);
@@ -204,7 +208,7 @@ public class Login extends JFrame implements KeyListener{
         signupP.add(sLabelLink);
 
         // ----- LOGIN PART -----
-        loginP = new JPanel(new GridLayout(7, 1,30,15));
+        loginP = new JPanel(new GridLayout(7, 1, 30, 15));
         loginP.setSize(300, 500);
         loginP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -469,7 +473,7 @@ public class Login extends JFrame implements KeyListener{
         }
 
         //Username validation
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = Database.getConnection()) {
             String selectQuery = "SELECT * FROM Credentials WHERE BINARY Users = ?";
             try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                 statement.setString(1, userF);
@@ -502,7 +506,7 @@ public class Login extends JFrame implements KeyListener{
         }
 
         //Email validation
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = Database.getConnection()) {
             String selectQuery = "SELECT * FROM Credentials WHERE BINARY Emails = ?";
             try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                 statement.setString(1, emailF);
@@ -550,7 +554,7 @@ public class Login extends JFrame implements KeyListener{
         }
 
         //User registration into database
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = Database.getConnection()) {
             String insertQuery = "INSERT INTO Credentials (Users, Passwords, Emails, Roles) VALUES (?, ?, ?, ?)";
             try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
                 statement.setString(1, userF);
@@ -609,7 +613,7 @@ public class Login extends JFrame implements KeyListener{
         boolean isEmail = userF.endsWith("@gmail.com");
 
         //Checks existing user with correct password
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = Database.getConnection()) {
             String selectQuery = isEmail ? "SELECT * FROM Credentials WHERE BINARY Emails = ?" : "SELECT * FROM Credentials WHERE BINARY Users = ?";
             try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
                 statement.setString(1, userF);
@@ -628,17 +632,18 @@ public class Login extends JFrame implements KeyListener{
                         offlineSound();
                         dispose();
 
+                        String role = resultSet.getString("Roles");
                         if (resultSet.getString("Roles").equalsIgnoreCase("Administrator")) {
                             //Admin Control - bahala na si Justine
                             loginSound();
-                            new MainPanel(userF);
+                            new MainPanel(userF,role);
                         } else if (resultSet.getString("Roles").equalsIgnoreCase("User")) {
                             //Code ni Rommards
                             loginSound();
-                            new MainPanel(userF);
+                            new MainPanel(userF,role);
                         } else {
                             loginSound();
-                            new MainPanel(userF);
+                            new MainPanel(userF,role);
                         }
 
                     } else {
@@ -776,7 +781,7 @@ public class Login extends JFrame implements KeyListener{
 // -- DUMP AFTER CONNECTING ROMMARDS CODE --
 //Call after successful login
 class MainPanel extends JFrame{
-    public MainPanel(String username) {
+    public MainPanel(String username, String role) {
         setTitle("Main Panel : @" + username);
         setSize(900, 500);
         setLocationRelativeTo(null);
@@ -797,6 +802,11 @@ class MainPanel extends JFrame{
         welcomeLabel.setForeground(WHITE);
 
         JButton logoutButton = new JButton("Logout");
+        logoutButton.setFocusable(false);
+        logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        logoutButton.setBorder(BorderFactory.createLineBorder(ORANGE, 2));
+
+        JButton adminButton = new JButton("Admin Controls");
         logoutButton.setFocusable(false);
         logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         logoutButton.setBorder(BorderFactory.createLineBorder(ORANGE, 2));
@@ -825,12 +835,19 @@ class MainPanel extends JFrame{
                 logoutButton.setForeground(ORANGE);
             }
         });
+        adminButton.addActionListener( e -> {
+            new AdminDashboard();
+        });
 
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(DGRAY);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         contentPanel.add(usernameLabel, BorderLayout.NORTH);
-        contentPanel.add(welcomeLabel, BorderLayout.CENTER);
+        if (role.equals("Administrator")){
+            contentPanel.add(adminButton, BorderLayout.CENTER);
+        }else{
+            contentPanel.add(welcomeLabel, BorderLayout.CENTER);
+        }
         contentPanel.add(logoutButton, BorderLayout.SOUTH);
         add(contentPanel, BorderLayout.CENTER);
         setVisible(true);
