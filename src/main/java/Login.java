@@ -1,6 +1,7 @@
 //Import necessary libraries
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.fonts.inter.FlatInterFont;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.ui.FlatLineBorder;
@@ -11,7 +12,6 @@ import java.awt.Dimension;
 import java.awt.event.*;
 import java.net.URL;
 import java.sql.*;
-import java.util.Arrays;
 import static constants.RegexConstants.*;
 import static constants.DatabaseConstants.*;
 import static constants.Colors.*;
@@ -37,13 +37,11 @@ public class Login extends JFrame implements KeyListener{
     public Login() {
         setTitle("Log In");
         loginSound();
+        UIManager.put("defaultFont", new Font(FlatInterFont.FAMILY, Font.PLAIN, 13));
 
         // -- GUI creation and designs --
-        URL logoURL = getClass().getResource("/icons/Favicon.png");
-        ImageIcon logo = new ImageIcon(logoURL);
-
         contentPanel = new JPanel();
-        contentPanel.setBackground(Color.DARK_GRAY);
+        contentPanel.setBackground(DGRAY);
         contentPanel.setSize(700, 300);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -52,10 +50,13 @@ public class Login extends JFrame implements KeyListener{
         signupP.setSize(352, 612);
         signupP.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        URL logoURL = getClass().getResource("/icons/Favicon.png");
+        ImageIcon logo = new ImageIcon(logoURL);
+
         sLabel = new JLabel("Sign Up", JLabel.CENTER);
         sLabel.setIcon(logo);
         sLabel.setIconTextGap(10);
-        sLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
+        sLabel.setFont(new Font(FlatInterFont.FAMILY, Font.BOLD, 20));
         sLabel.setForeground(UIManager.getColor("Label.foreground"));
 
         sUser = new JTextField(20);
@@ -90,7 +91,7 @@ public class Login extends JFrame implements KeyListener{
             @Override
             public void mouseEntered(MouseEvent e) {
                 sButton.setBackground(accentColor);
-                sButton.setForeground(Color.WHITE);
+                sButton.setForeground(WHITE);
             }
 
             @Override
@@ -115,11 +116,23 @@ public class Login extends JFrame implements KeyListener{
         sErrorLabel.setOpaque(true);
         sErrorLabel.setForeground(new Color(255, 255, 255));
         sErrorLabel.setBackground(errorColor);
-        sErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), Color.red, 1f, 12));
+        sErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), RED, 1f, 12));
         sErrorLabel.setVisible(false);
 
+        URL loginWhiteURL = getClass().getResource("/icons/login_white3.png");
+        URL loginBlueURL = getClass().getResource("/icons/login_blue3.png");
+        ImageIcon loginWhite = new ImageIcon(loginWhiteURL);
+        ImageIcon loginBlue = new ImageIcon(loginBlueURL);
+        Image scaledLoginWhite = loginWhite.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        Image scaledLoginBlue = loginBlue.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        ImageIcon scaledLoginWhiteIcon = new ImageIcon(scaledLoginWhite);
+        ImageIcon scaledLoginBlueIcon = new ImageIcon(scaledLoginBlue);
+
         sLabelLink = new JLabel("Already have an account? Log in here!");
-        sLabelLink.setForeground(Color.WHITE);
+        sLabelLink.setForeground(WHITE);
+        sLabelLink.setIcon(scaledLoginWhiteIcon);
+        sLabelLink.setIconTextGap(10);
+        sLabelLink.setHorizontalTextPosition(SwingConstants.LEFT);
         sLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         sLabelLink.addMouseListener(new MouseAdapter() {
             @Override
@@ -132,7 +145,31 @@ public class Login extends JFrame implements KeyListener{
                     sEmail.setText("");
                     lUser.setText("");
                     lPass.setText("");
-                    sErrorLabel.setVisible(false);
+                    new Thread(() -> {
+                        SwingUtilities.invokeLater(() -> {
+                            // UI update logic here (same as inside your Timer)
+                            loginP.remove(lErrorLabel);
+                            loginP.remove(lLabelLink);
+                            loginP.remove(forgotPasswordLink);
+                            loginP.remove(qrCodeLoginLink);
+                            loginP.setLayout(new GridLayout(7, 1, 30, 15));
+                            loginP.add(lLabelLink);
+                            loginP.add(forgotPasswordLink);
+                            loginP.add(qrCodeLoginLink);
+
+                            signupP.remove(sErrorLabel);
+                            signupP.remove(sLabelLink);
+                            signupP.setLayout(new GridLayout(6, 1, 0, 22));
+                            signupP.add(sLabelLink);
+
+                            lErrorLabel.setVisible(false);
+                            sErrorLabel.setVisible(false);
+                            loginP.revalidate();
+                            signupP.revalidate();
+                            loginP.repaint();
+                            signupP.repaint();
+                        });
+                    }).start();
                     remove(contentPanel);
                     contentPanel = loginP;
                     add(contentPanel, BorderLayout.CENTER);
@@ -142,16 +179,20 @@ public class Login extends JFrame implements KeyListener{
                     errorSound();
                     JOptionPane.showMessageDialog(contentPanel, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+                sLabelLink.setForeground(Color.WHITE);
+                sLabelLink.setIcon(scaledLoginWhiteIcon);
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                sLabelLink.setForeground(Color.LIGHT_GRAY);
+                sLabelLink.setForeground(accentColor);
+                sLabelLink.setIcon(scaledLoginBlueIcon);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                sLabelLink.setForeground(Color.WHITE);
+                sLabelLink.setForeground(WHITE);
+                sLabelLink.setIcon(scaledLoginWhiteIcon);
             }
         });
 
@@ -170,7 +211,7 @@ public class Login extends JFrame implements KeyListener{
         lLabel = new JLabel("Log In", JLabel.CENTER);
         lLabel.setIcon(logo);
         lLabel.setIconTextGap(10);
-        lLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
+        lLabel.setFont(new Font(FlatInterFont.FAMILY, Font.BOLD, 20));
         lLabel.setForeground(UIManager.getColor("Label.foreground"));
 
         lUser = new JTextField(20);
@@ -198,7 +239,7 @@ public class Login extends JFrame implements KeyListener{
             @Override
             public void mouseEntered(MouseEvent e) {
                 lButton.setBackground(accentColor);
-                lButton.setForeground(Color.WHITE);
+                lButton.setForeground(WHITE);
             }
 
             @Override
@@ -221,11 +262,23 @@ public class Login extends JFrame implements KeyListener{
         lErrorLabel.setOpaque(true);
         lErrorLabel.setForeground(new Color(255, 255, 255));
         lErrorLabel.setBackground(errorColor);
-        lErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), Color.red, 1f, 12));
+        lErrorLabel.setBorder(new FlatLineBorder(new Insets(5, 10, 5, 10), RED, 1f, 12));
         lErrorLabel.setVisible(false);
 
+        URL signupWhiteURL = getClass().getResource("/icons/signup_white.png");
+        URL signupBlueURL = getClass().getResource("/icons/signup_blue.png");
+        ImageIcon signupWhite = new ImageIcon(signupWhiteURL);
+        ImageIcon signupBlue = new ImageIcon(signupBlueURL);
+        Image scaledSignupWhite = signupWhite.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        Image scaledSignupBlue = signupBlue.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        ImageIcon scaledSignupWhiteIcon = new ImageIcon(scaledSignupWhite);
+        ImageIcon scaledSignupBlueIcon = new ImageIcon(scaledSignupBlue);
+
         lLabelLink = new JLabel("Don't have an account? Sign up here!");
-        lLabelLink.setForeground(Color.WHITE);
+        lLabelLink.setIcon(scaledSignupWhiteIcon);
+        lLabelLink.setIconTextGap(10);
+        lLabelLink.setHorizontalTextPosition(SwingConstants.LEFT);
+        lLabelLink.setForeground(WHITE);
         lLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         lLabelLink.addMouseListener(new MouseAdapter() {
             @Override
@@ -238,7 +291,31 @@ public class Login extends JFrame implements KeyListener{
                     sEmail.setText("");
                     lUser.setText("");
                     lPass.setText("");
-                    lErrorLabel.setVisible(false);
+                    new Thread(() -> {
+                        SwingUtilities.invokeLater(() -> {
+                            // UI update logic here (same as inside your Timer)
+                            loginP.remove(lErrorLabel);
+                            loginP.remove(lLabelLink);
+                            loginP.remove(forgotPasswordLink);
+                            loginP.remove(qrCodeLoginLink);
+                            loginP.setLayout(new GridLayout(7, 1, 30, 15));
+                            loginP.add(lLabelLink);
+                            loginP.add(forgotPasswordLink);
+                            loginP.add(qrCodeLoginLink);
+
+                            signupP.remove(sErrorLabel);
+                            signupP.remove(sLabelLink);
+                            signupP.setLayout(new GridLayout(6, 1, 0, 22));
+                            signupP.add(sLabelLink);
+
+                            lErrorLabel.setVisible(false);
+                            sErrorLabel.setVisible(false);
+                            loginP.revalidate();
+                            signupP.revalidate();
+                            loginP.repaint();
+                            signupP.repaint();
+                        });
+                    }).start();
                     remove(contentPanel);
                     contentPanel = signupP;
                     add(contentPanel, BorderLayout.CENTER);
@@ -248,58 +325,94 @@ public class Login extends JFrame implements KeyListener{
                     errorSound();
                     JOptionPane.showMessageDialog(contentPanel, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+                lLabelLink.setForeground(Color.WHITE);
+                lLabelLink.setIcon(scaledSignupWhiteIcon);
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                lLabelLink.setForeground(Color.LIGHT_GRAY);
+                lLabelLink.setForeground(accentColor);
+                lLabelLink.setIcon(scaledSignupBlueIcon);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                lLabelLink.setForeground(Color.WHITE);
+                lLabelLink.setForeground(WHITE);
+                lLabelLink.setIcon(scaledSignupWhiteIcon);
             }
         });
 
+        URL forgotWhiteURL = getClass().getResource("/icons/forgot_white.png");
+        URL forgotBlueURL = getClass().getResource("/icons/forgot_blue.png");
+        ImageIcon forgotWhite = new ImageIcon(forgotWhiteURL);
+        ImageIcon forgotBlue = new ImageIcon(forgotBlueURL);
+        Image scaledForgotWhite = forgotWhite.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        Image scaledForgotBlue = forgotBlue.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        ImageIcon scaledForgotWhiteIcon = new ImageIcon(scaledForgotWhite);
+        ImageIcon scaledForgotBlueIcon = new ImageIcon(scaledForgotBlue);
+
         forgotPasswordLink = new JLabel("Forgot Password?");
-        forgotPasswordLink.setForeground(Color.WHITE);
+        forgotPasswordLink.setIcon(scaledForgotWhiteIcon);
+        forgotPasswordLink.setIconTextGap(10);
+        forgotPasswordLink.setHorizontalTextPosition(SwingConstants.LEFT);
+        forgotPasswordLink.setForeground(WHITE);
         forgotPasswordLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         forgotPasswordLink.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 ForgotPassword forgotPass = new ForgotPassword(DB_URL, DB_USER, DB_PASSWORD);
                 forgotPass.forgotFunc();
+                forgotPasswordLink.setForeground(WHITE);
+                forgotPasswordLink.setIcon(scaledForgotWhiteIcon);
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                forgotPasswordLink.setForeground(Color.LIGHT_GRAY);
+                forgotPasswordLink.setForeground(accentColor);
+                forgotPasswordLink.setIcon(scaledForgotBlueIcon);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                forgotPasswordLink.setForeground(Color.WHITE);
+                forgotPasswordLink.setForeground(WHITE);
+                forgotPasswordLink.setIcon(scaledForgotWhiteIcon);
             }
         });
 
+        URL qrWhiteURL = getClass().getResource("/icons/QrWhite.png");
+        URL qrBlueURL = getClass().getResource("/icons/QrBlue.png");
+        ImageIcon qrWhite = new ImageIcon(qrWhiteURL);
+        ImageIcon qrBlue = new ImageIcon(qrBlueURL);
+        Image scaledWhite = qrWhite.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        Image scaledBlue = qrBlue.getImage().getScaledInstance(21, 21, Image.SCALE_SMOOTH);
+        ImageIcon scaledQrWhite = new ImageIcon(scaledWhite);
+        ImageIcon scaledQrBlue = new ImageIcon(scaledBlue);
+
         qrCodeLoginLink = new JLabel("Log in using QR Code");
-        qrCodeLoginLink.setForeground(Color.WHITE);
+        qrCodeLoginLink.setIcon(scaledQrWhite);
+        qrCodeLoginLink.setHorizontalTextPosition(SwingConstants.LEFT);
+        qrCodeLoginLink.setIconTextGap(10);
+        qrCodeLoginLink.setForeground(WHITE);
         qrCodeLoginLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         qrCodeLoginLink.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 new QRCodeLogin(Login.this);
                 loginSound();
+                qrCodeLoginLink.setForeground(WHITE);
+                qrCodeLoginLink.setIcon(scaledQrWhite);
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                qrCodeLoginLink.setForeground(Color.LIGHT_GRAY);
+                qrCodeLoginLink.setForeground(accentColor);
+                qrCodeLoginLink.setIcon(scaledQrBlue);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                qrCodeLoginLink.setForeground(Color.WHITE);
+                qrCodeLoginLink.setForeground(WHITE);
+                qrCodeLoginLink.setIcon(scaledQrWhite);
             }
         });
 
@@ -343,9 +456,8 @@ public class Login extends JFrame implements KeyListener{
     //user registration and login handling
     private void handleSignUp() {
         //Get inputs from fields
-        char[] toCheck = sPass.getPassword();
         String userF = sUser.getText();
-        String passF = new String(toCheck);
+        String passF = new String(sPass.getPassword());
         String emailF = sEmail.getText();
 
         //Checks empty field
@@ -474,7 +586,7 @@ public class Login extends JFrame implements KeyListener{
             errorSound();
             JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
-        Arrays.fill(toCheck, '\0');
+        
     }
 
     private void handleLogin() {
@@ -488,9 +600,8 @@ public class Login extends JFrame implements KeyListener{
         }
 
         //Get inputs from fields
-        char[] toCheck = lPass.getPassword();
         String userF = lUser.getText();
-        String passF = new String(toCheck);
+        String passF = new String(lPass.getPassword());
 
         //Checks empty field
         if (userF.isEmpty() || passF.isEmpty()) {
@@ -524,7 +635,7 @@ public class Login extends JFrame implements KeyListener{
                         dispose();
 
                         if (resultSet.getString("Roles").equalsIgnoreCase("Administrator")) {
-                            //Admin Control
+                            //Admin Control - bahala na si Justine
                             loginSound();
                             new MainPanel(userF);
                         } else if (resultSet.getString("Roles").equalsIgnoreCase("User")) {
@@ -555,7 +666,6 @@ public class Login extends JFrame implements KeyListener{
             errorSound();
             JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
-        Arrays.fill(toCheck, '\0');
     }
 
     //Text Field Designer
@@ -563,7 +673,7 @@ public class Login extends JFrame implements KeyListener{
         textField.putClientProperty(FlatClientProperties.STYLE,
                 "borderWidth: 2; borderColor: #1877F2;");
 
-        textField.setFont(new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 14));
+        textField.setFont(new Font(FlatInterFont.FAMILY, Font.PLAIN, 14));
         textField.setBackground(backgroundColor);
     }
 
@@ -572,7 +682,7 @@ public class Login extends JFrame implements KeyListener{
         passwordField.putClientProperty(FlatClientProperties.STYLE,
                 "showRevealButton: true; showCapsLock: true; borderWidth: 2; borderColor: #1877F2;");
 
-        passwordField.setFont(new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 14));
+        passwordField.setFont(new Font(FlatInterFont.FAMILY, Font.PLAIN, 14));
         passwordField.setBackground(backgroundColor);
     }
 
@@ -580,7 +690,7 @@ public class Login extends JFrame implements KeyListener{
     private void buttonDesigner(JButton button) {
         button.putClientProperty(FlatClientProperties.STYLE, "borderWidth: 2; borderColor: #1877F2;");
 
-        button.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 13));
+        button.setFont(new Font(FlatInterFont.FAMILY, Font.BOLD, 13));
         button.setBackground(backgroundColor);
     }
 
@@ -640,9 +750,9 @@ public class Login extends JFrame implements KeyListener{
 
     //Main method
     public static void main(String[] args) {
-        FlatRobotoFont.install();
+        FlatInterFont.install();
         FlatLaf.registerCustomDefaultsSource("uca.themes");
-        UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
+        UIManager.put("defaultFont", new Font(FlatInterFont.FAMILY, Font.PLAIN, 13));
         FlatMacDarkLaf.setup();
         new Login();
     }
@@ -681,24 +791,24 @@ class MainPanel extends JFrame{
 
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("uca.themes");
-        UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
+        UIManager.put("defaultFont", new Font(FlatInterFont.FAMILY, Font.PLAIN, 13));
         FlatMacDarkLaf.setup();
 
         JLabel usernameLabel = new JLabel("@" + username, JLabel.CENTER);
-        usernameLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 18));
-        usernameLabel.setForeground(Color.WHITE);
+        usernameLabel.setFont(new Font(FlatInterFont.FAMILY, Font.BOLD, 18));
+        usernameLabel.setForeground(WHITE);
 
         JLabel welcomeLabel = new JLabel("Welcome to the Main Panel", JLabel.CENTER);
-        welcomeLabel.setFont(new Font(FlatRobotoFont.FAMILY, Font.BOLD, 20));
-        welcomeLabel.setForeground(Color.WHITE);
+        welcomeLabel.setFont(new Font(FlatInterFont.FAMILY, Font.BOLD, 20));
+        welcomeLabel.setForeground(WHITE);
 
         JButton logoutButton = new JButton("Logout");
         logoutButton.setFocusable(false);
         logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        logoutButton.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
+        logoutButton.setBorder(BorderFactory.createLineBorder(ORANGE, 2));
 
-        logoutButton.setBackground(Color.WHITE);
-        logoutButton.setForeground(Color.ORANGE);
+        logoutButton.setBackground(WHITE);
+        logoutButton.setForeground(ORANGE);
         logoutButton.setFont(new Font("Arial", Font.BOLD, 16));
         logoutButton.setPreferredSize(new Dimension(50, 50));
         logoutButton.setFocusable(false);
@@ -711,19 +821,19 @@ class MainPanel extends JFrame{
         logoutButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                logoutButton.setBackground(Color.ORANGE);
-                logoutButton.setForeground(Color.WHITE);
+                logoutButton.setBackground(ORANGE);
+                logoutButton.setForeground(WHITE);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                logoutButton.setBackground(Color.WHITE);
-                logoutButton.setForeground(Color.ORANGE);
+                logoutButton.setBackground(WHITE);
+                logoutButton.setForeground(ORANGE);
             }
         });
 
         JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(Color.DARK_GRAY);
+        contentPanel.setBackground(DGRAY);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         contentPanel.add(usernameLabel, BorderLayout.NORTH);
         contentPanel.add(welcomeLabel, BorderLayout.CENTER);
