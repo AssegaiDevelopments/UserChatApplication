@@ -588,6 +588,9 @@ public class Login extends JFrame implements KeyListener{
     }
 
     private void handleLogin() {
+        lButton.setEnabled(false);
+        lButton.setText("Please wait...");
+
         //Checks if the user is locked out
         if (System.currentTimeMillis() < lockTime) {
             long remainingTime = (lockTime - System.currentTimeMillis()) / 1000;
@@ -665,6 +668,9 @@ public class Login extends JFrame implements KeyListener{
             errorSound();
             JOptionPane.showMessageDialog(contentPanel, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
+
+        lButton.setEnabled(true);
+        lButton.setText("Log In");
     }
 
     //Text Field Designer
@@ -835,9 +841,7 @@ class MainPanel extends JFrame{
                 logoutButton.setForeground(ORANGE);
             }
         });
-        adminButton.addActionListener( e -> {
-            new AdminDashboard();
-        });
+        adminButton.addActionListener( e -> new AdminDashboard());
 
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(DGRAY);

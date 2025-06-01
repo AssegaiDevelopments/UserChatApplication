@@ -3,9 +3,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
 
-import static constants.DatabaseConstants.*;
-
 public class AdminDashboard extends JFrame {
+
     public AdminDashboard() {
         setTitle("Admin Dashboard");
         setSize(800, 500);
@@ -16,9 +15,16 @@ public class AdminDashboard extends JFrame {
         setVisible(true);
     }
 
+
     private void initComponents() {
+
         JTable userTable = new JTable();
-        DefaultTableModel model = new DefaultTableModel(new String[]{"Users", "Role", "Status"}, 0);
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Users", "Role", "Status"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Disable editing for all cells
+            }
+        };
         userTable.setModel(model);
 
         JScrollPane scrollPane = new JScrollPane(userTable);
@@ -37,6 +43,7 @@ public class AdminDashboard extends JFrame {
         buttonPanel.add(promoteButton);
         buttonPanel.add(demoteButton);
         add(buttonPanel, BorderLayout.SOUTH);
+
 
         // Load users into the table
         try (Connection conn = Database.getConnection();
