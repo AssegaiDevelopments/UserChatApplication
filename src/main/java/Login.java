@@ -35,7 +35,7 @@ public class Login extends JFrame implements KeyListener{
 
     //Login constructor
     public Login() {
-        setTitle("Log In");
+        setTitle("Connect - Log In");
         loginSound();
         UIManager.put("defaultFont", new Font(FlatInterFont.FAMILY, Font.PLAIN, 13));
 
@@ -138,7 +138,7 @@ public class Login extends JFrame implements KeyListener{
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    setTitle("Log In");
+                    setTitle("Connect - Log In");
                     loginSound();
                     sUser.setText("");
                     sPass.setText("");
@@ -284,7 +284,7 @@ public class Login extends JFrame implements KeyListener{
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    setTitle("Sign Up");
+                    setTitle("Connect - Sign Up");
                     loginSound();
                     sUser.setText("");
                     sPass.setText("");
@@ -493,12 +493,6 @@ public class Login extends JFrame implements KeyListener{
                     handleErrorUI();
                     sPass.setText("");
                     return;
-                } else if (!userF.matches(COMPLEX_PASSWORD_PATTERN)) {
-                    sErrorLabel.setText("<html><div style='width:156px'>Username can only contain letters (A-Z), numbers (0-9), and underscores (_).</div></html>");
-                    errorSound();
-                    handleErrorUI();
-                    sPass.setText("");
-                    return;
                 }
             }
         } catch (SQLException ex) {
@@ -569,7 +563,7 @@ public class Login extends JFrame implements KeyListener{
                     loginSound();
                     JOptionPane.showMessageDialog(contentPanel, "Signup successful!", "Registration successful", JOptionPane.INFORMATION_MESSAGE);
                     sErrorLabel.setVisible(false);
-                    setTitle("Log In");
+                    setTitle(" Connect - Log In");
                     remove(contentPanel);
                     contentPanel = loginP;
                     add(contentPanel, BorderLayout.CENTER);
